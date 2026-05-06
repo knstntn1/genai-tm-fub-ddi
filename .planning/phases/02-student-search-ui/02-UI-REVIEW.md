@@ -1,6 +1,6 @@
 # Phase 2 - UI Review
 
-**Audited:** 2026-05-06
+**Audited:** 2026-05-07
 **Baseline:** `.planning/phases/02-student-search-ui/02-UI-SPEC.md`
 **Screenshots:** not captured (no dev server on localhost:3000, 5173, or 8080)
 
@@ -10,22 +10,30 @@
 
 | Pillar | Score | Key Finding |
 |--------|-------|-------------|
-| 1. Copywriting | 4/4 | German contract copy is localized and the dialog consumes the expected keys. |
-| 2. Visuals / Layout | 2/4 | Result grid violates the required 2/3/4 responsive column contract. |
-| 3. Color | 3/4 | Accent usage is restrained, but overlay colors are hardcoded and one imported token is unused. |
-| 4. Typography | 4/4 | Component typography matches the declared 18/16/14 size system. |
-| 5. Spacing | 2/4 | Several spacing values fall outside the approved spacing scale. |
-| 6. Experience Design / Accessibility | 3/4 | Core states and keyboard activation exist, but `loading-more` is outside the live region and touch affordance is only implicit. |
+| 1. Copywriting | 4/4 | Contract copy is localized through `trainingdata.openverse.*` keys and tested with the approved German strings. |
+| 2. Visuals | 4/4 | Previous grid issue is fixed: CSS now uses explicit 2/3/4 breakpoints and stable square image-only tiles. |
+| 3. Color | 3/4 | Accent use is restrained, but overlay contrast colors remain hardcoded outside the token system. |
+| 4. Typography | 4/4 | Typography matches the approved 18/16/14px size system and 600/400 weight roles. |
+| 5. Spacing | 4/4 | Previous off-scale spacing is fixed; component spacing now stays on the approved scale or documented tile exceptions. |
+| 6. Experience Design | 4/4 | Previous loading-more announcement gap is fixed with a live region plus `role="status"` coverage and tests. |
 
-**Overall: 18/24**
+**Overall: 23/24**
 
 ---
 
 ## Top 3 Priority Fixes
 
-1. **Fix the result grid breakpoints** - the current `auto-fill` grid can show 4 columns at 480px and up to 6 columns in a 700px dialog, breaking the specified scan pattern - replace with explicit 2/3/4 column rules at `<480px`, `>=480px`, and `>=700px`.
-2. **Normalize spacing to the declared scale** - off-scale title padding, negative close margin, 12px loading gaps, and 6px failed-use padding make the dialog less consistent with the app system - use 4/8/16/24/32/48/64px values or document true exceptions.
-3. **Tighten assistive-state coverage** - `loading-more` is visible but not inside the `aria-live` status region, and tests do not verify CSS reveal/touch behavior - move loading-more into the live region or add `role="status"`, then add focused checks for hover/focus/touch-equivalent state.
+1. **Tokenize overlay contrast colors** - thumbnail overlay readability is good, but `rgba(0, 0, 0, ...)` values bypass the declared color system - introduce local semantic CSS variables or reuse an approved overlay token if one exists.
+2. **Capture visual screenshots once the dialog is reachable in-app** - this audit was code-only because no dev server was running - run the dialog at desktop/tablet/mobile sizes and verify the 2/3/4 grid and sticky search row visually.
+3. **Add a direct CSS/layout regression check for breakpoints** - component behavior tests pass, but media-query layout can regress without a style assertion - keep a targeted CSS check or visual test for the `480px` and `700px` grid rules.
+
+---
+
+## Previous Top Fixes
+
+- PASS: Explicit 2/3/4 grid breakpoints are present in `OpenVerseSearchDialog.module.css:84`, `OpenVerseSearchDialog.module.css:168`, and `OpenVerseSearchDialog.module.css:174`.
+- PASS: Spacing now uses approved values such as 4px, 8px, 16px, 24px, 48px, plus the allowed 5-6px tile radius exception in `OpenVerseSearchDialog.module.css:12`, `OpenVerseSearchDialog.module.css:13`, `OpenVerseSearchDialog.module.css:28`, `OpenVerseSearchDialog.module.css:66`, and `OpenVerseSearchDialog.module.css:153`.
+- PASS: Loading-more is inside the polite state region and also marked with `role="status"` in `OpenVerseSearchDialog.tsx:232` and `OpenVerseSearchDialog.tsx:271`; the regression test asserts this at `OpenVerseSearchDialog.test.tsx:333`.
 
 ---
 
@@ -33,41 +41,40 @@
 
 ### Pillar 1: Copywriting (4/4)
 
-- PASS: The component uses localized keys through `useTranslation(namespace)` for the dialog title, search label, placeholder, primary CTA, overlay action, loading/empty/error/rate-limit/retry/pagination/failed-use copy in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:197`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:212`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:228`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:241`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:247`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:265`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:293`, and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:322`.
-- PASS: The German locale contains the approved strings, including `OpenVerse: {{className}}`, `Bilder suchen`, `Dieses Bild nutzen`, `Keine Bilder gefunden.`, and `Mehr Ergebnisse` in `public/locales/de-DE/image_adv.json:110`.
-- PASS: Visible metadata and advanced filter copy is not rendered by the component; tests explicitly guard against visible license, creator, source, dimensions, URL, filter comboboxes, and mature controls in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx:206`.
+- PASS: The dialog consumes localized keys through `useTranslation(namespace)` for the scoped title, search label, placeholder, CTA, loading, empty, error, rate-limit, retry, pagination, failed-use, and fallback-alt copy in `OpenVerseSearchDialog.tsx:197`, `OpenVerseSearchDialog.tsx:212`, `OpenVerseSearchDialog.tsx:220`, `OpenVerseSearchDialog.tsx:228`, `OpenVerseSearchDialog.tsx:241`, `OpenVerseSearchDialog.tsx:247`, `OpenVerseSearchDialog.tsx:265`, `OpenVerseSearchDialog.tsx:277`, `OpenVerseSearchDialog.tsx:296`, and `OpenVerseSearchDialog.tsx:325`.
+- PASS: The test fixture uses the approved German contract strings, including `Bilder suchen`, `Dieses Bild nutzen`, `Weitere Bilder werden geladen...`, `Keine Bilder gefunden.`, and `Mehr Ergebnisse` in `OpenVerseSearchDialog.test.tsx:13`.
+- PASS: The visible result grid excludes metadata and advanced controls; tests guard against title, license, creator, source, dimensions, URL, filter comboboxes, and mature controls in `OpenVerseSearchDialog.test.tsx:206`.
 
-### Pillar 2: Visuals / Layout (2/4)
+### Pillar 2: Visuals (4/4)
 
-- WARNING: The results grid does not follow the spec's explicit responsive contract of 2 columns below 480px, 3 columns from 480px, and 4 columns from 700px. `repeat(auto-fill, minmax(112px, 1fr))` in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:86` will create more columns as space allows, including 4 at roughly 480px and more than 4 near 700px.
-- PASS: The result tiles are image-only at rest, square, `object-fit: cover`, and free of visible captions or metadata in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:272` and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:90`.
-- PASS: The dialog uses MUI `Dialog`, `DialogTitle`, `DialogContent`, a close icon, a sticky search row, and compact max width/height in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:189` and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:3`.
+- PASS: The previous auto-fill grid defect is fixed. The grid is 2 columns by default, 3 columns at `min-width: 480px`, and 4 columns at `min-width: 700px` in `OpenVerseSearchDialog.module.css:84`, `OpenVerseSearchDialog.module.css:168`, and `OpenVerseSearchDialog.module.css:174`.
+- PASS: Result tiles are square, image-first, and stable with `aspect-ratio: 1 / 1`, `min-width: 96px`, `object-fit: cover`, and no visible captions in `OpenVerseSearchDialog.module.css:90` and `OpenVerseSearchDialog.module.css:116`.
+- PASS: The dialog follows the compact MUI structure required by the spec: `Dialog`, `DialogTitle`, close `IconButton`, `DialogContent`, one form row, and result-grid body in `OpenVerseSearchDialog.tsx:188`.
 
 ### Pillar 3: Color (3/4)
 
-- WARNING: The component imports the approved color tokens but leaves `primaryHover` unused in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:1`, which suggests token drift or dead design-system wiring.
-- WARNING: Hardcoded overlay colors are used for action and failed-use states in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:130` and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:154`. These are defensible for thumbnail readability, but they bypass the token system.
-- PASS: Accent use is restrained to focus/hover tile affordance and inherited button/progress components. Direct primary usage appears only on the result tile border/outline in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:107`.
+- WARNING: Overlay and failed-use contrast colors are hardcoded as `rgba(0, 0, 0, 0.58)` and `rgba(0, 0, 0, 0.72)` in `OpenVerseSearchDialog.module.css:131` and `OpenVerseSearchDialog.module.css:155`. They are functionally appropriate for busy thumbnails, but the UI spec asks for base color tokens where practical.
+- PASS: Accent usage is correctly restrained to interactive affordances: primary appears on result hover/focus border and outline only in this CSS module at `OpenVerseSearchDialog.module.css:107`.
+- PASS: Dominant white surfaces match the contract for the sticky form and tile rest state in `OpenVerseSearchDialog.module.css:41` and `OpenVerseSearchDialog.module.css:99`.
 
 ### Pillar 4: Typography (4/4)
 
-- PASS: Declared component typography matches the spec: title uses 18px/600/1.2 in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:15`, state text uses 16px/1.5 in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:57`, and overlay/failed-use text uses 14px/600/1.2 in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:132` and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:156`.
-- PASS: The component relies on MUI and the existing base `Button` for control internals, which is allowed by the spec's Material UI exception.
+- PASS: The title uses the approved heading role, `18px / 600 / 1.2`, in `OpenVerseSearchDialog.module.css:15`.
+- PASS: State text uses the approved body sizing, `16px / 1.5`, in `OpenVerseSearchDialog.module.css:57`.
+- PASS: Overlay and failed-use text use the approved button/overlay role, `14px / 600 / 1.2`, in `OpenVerseSearchDialog.module.css:132` and `OpenVerseSearchDialog.module.css:156`.
 
-### Pillar 5: Spacing (2/4)
+### Pillar 5: Spacing (4/4)
 
-- WARNING: The title padding uses `0.75rem 1.8rem` in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:13`, resolving to 12px and 28.8px under a 16px root. Neither value is in the approved spacing scale.
-- WARNING: The close button uses a negative margin at `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:22`, which is outside the declared scale and can make focus-ring clipping harder to reason about.
-- WARNING: Loading states use a 12px gap in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:70`, and failed-use copy uses 6px padding in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:152`; both are outside the spacing scale. Border radii at 5-6px are allowed by the visual constraints, but padding/gaps are not listed exceptions.
-- PASS: Core content/form/grid spacing mostly uses 8px, 16px, and 24px in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:28`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:36`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:40`, and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:87`.
+- PASS: The previous off-scale title padding, negative close margin, 12px gaps, and 6px failed-use padding are gone. Current layout spacing uses approved 4/8/16/24/48px values in `OpenVerseSearchDialog.module.css:12`, `OpenVerseSearchDialog.module.css:13`, `OpenVerseSearchDialog.module.css:28`, `OpenVerseSearchDialog.module.css:40`, `OpenVerseSearchDialog.module.css:66`, and `OpenVerseSearchDialog.module.css:149`.
+- PASS: The result grid uses the approved 8px gutter and stable minimum 96px tile exception in `OpenVerseSearchDialog.module.css:86` and `OpenVerseSearchDialog.module.css:87`.
+- PASS: The 5px and 6px radii remain within the UI spec's explicit visual exception for cards/tiles in `OpenVerseSearchDialog.module.css:49`, `OpenVerseSearchDialog.module.css:97`, and `OpenVerseSearchDialog.module.css:153`.
 
-### Pillar 6: Experience Design / Accessibility (3/4)
+### Pillar 6: Experience Design (4/4)
 
-- WARNING: `loading-more` is rendered outside the `aria-live="polite"` region, so appended-page loading may not be announced consistently to assistive tech. The live region ends at `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:270`, while loading-more is rendered at `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:308`.
-- WARNING: Touch behavior depends on the tile button immediately activating or `:active` briefly revealing the overlay in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:140`. That satisfies basic activation, but it does not make the overlay persistently available after a first tap for students who expect to inspect before using.
-- PASS: Result tiles are native buttons with German accessible names, thumbnail alt fallback, disabled pending state, and native Enter/Space activation in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:280`.
-- PASS: The implementation covers initial, loading, empty, retryable error, rate-limit, pagination, failed-use, stale-request abort, and retry behavior in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:71`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:145`, `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:162`, and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:315`.
-- PASS: Focus visibility uses a 2px primary outline and reveals the action overlay on focus in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:104` and `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:140`.
+- PASS: Initial, loading, empty, retryable error, rate-limit, pagination, failed-use, retry, stale-request abort, and disabled duplicate-search states are implemented in `OpenVerseSearchDialog.tsx:71`, `OpenVerseSearchDialog.tsx:126`, `OpenVerseSearchDialog.tsx:145`, `OpenVerseSearchDialog.tsx:162`, `OpenVerseSearchDialog.tsx:232`, `OpenVerseSearchDialog.tsx:252`, `OpenVerseSearchDialog.tsx:271`, and `OpenVerseSearchDialog.tsx:318`.
+- PASS: The previous loading-more announcement issue is fixed: `aria-live="polite"` wraps the state region at `OpenVerseSearchDialog.tsx:232`, and loading-more has `role="status"` at `OpenVerseSearchDialog.tsx:271`.
+- PASS: Result activation uses native buttons with disabled pending state, German accessible names, image alt fallback, and native click/Enter/Space semantics in `OpenVerseSearchDialog.tsx:290`.
+- PASS: Regression coverage is now broad: 10 focused tests cover explicit submit, state rendering, image-only results, activation, pagination append, failed-page retry, loading-more status announcement, failed-use state, and Phase 2 mutation boundaries in `OpenVerseSearchDialog.test.tsx:85`.
 
 ---
 
@@ -75,14 +82,13 @@
 
 Registry audit skipped: `components.json` is absent, the UI spec states `shadcn_initialized: false`, and the Registry Safety table lists no third-party blocks.
 
-Design-system safety: implementation uses MUI components, the existing `@genaitm/components/button/Button`, CSS modules, and base color tokens as required. Minor safety warning remains for unused `primaryHover` and hardcoded overlay colors in `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css:1`.
-
 ---
 
 ## Verification
 
-- `npm test -- src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx --run` - passed, 9 tests.
-- Screenshot capture - not run because no dev server responded on localhost ports 3000, 5173, or 8080.
+- `npm test -- src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx --run` - passed, 10 tests.
+- `npm run lint` - passed.
+- Screenshot capture - not captured because no dev server responded on localhost ports 3000, 5173, or 8080.
 
 ---
 
@@ -98,4 +104,3 @@ Design-system safety: implementation uses MUI components, the existing `@genaitm
 - `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.module.css`
 - `src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx`
 - `public/locales/de-DE/image_adv.json`
-- `src/components/button/Button.tsx`
