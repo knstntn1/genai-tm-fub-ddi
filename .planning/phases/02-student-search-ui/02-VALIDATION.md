@@ -41,7 +41,7 @@ created: 2026-05-06
 | 2-01-01 | 01 | 1 | UI-02, UI-03, UI-06 | Class-scoped explicit search renders initial/loading/empty/error/rate-limit states without stale updates | component | `npm test -- src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx --run` | pending |
 | 2-01-02 | 01 | 1 | UI-04, UI-05, UI-07, UI-08 | Image-only result grid exposes `Dieses Bild nutzen` through hover/focus/keyboard and appends `Mehr Ergebnisse` pages without metadata/filter UI | component | `npm test -- src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx --run` | pending |
 | 2-02-01 | 02 | 1 | UI-06, TEST-03 | Locale JSON provides German and fallback copy for all OpenVerse UI states | static/component | `npm test -- src/workflow/OpenVerseSearch/OpenVerseSearchDialog.test.tsx --run` | pending |
-| 2-02-02 | 02 | 1 | TEST-03 | Phase 2 does not import class-state mutation or remote canvas import boundaries | static grep/test | `rg "classState|setData|importOpenVerseImage|samples:" src/workflow/OpenVerseSearch` should print no matches | pending |
+| 2-02-02 | 02 | 1 | TEST-03 | Phase 2 does not import class-state mutation or remote canvas import boundaries | static grep/test | `bash -lc '! rg -n "classState|setData|importOpenVerseImage|samples:" src/workflow/OpenVerseSearch'` | pending |
 
 *Status: pending · green · red · flaky*
 

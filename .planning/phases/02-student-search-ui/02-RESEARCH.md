@@ -434,12 +434,11 @@ it('calls onUseImage from keyboard activation', async ({ expect }) => {
 | A2 | Hover-only CSS is insufficient for touch devices because hover is mouse-specific. | Common Pitfalls | Planner may under-spec touch activation tests. |
 | A3 | Missing request identity checks are a warning sign for stale async UI state. | Common Pitfalls | Planner may rely on abort alone and miss stale mocked-client behavior. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 2 add all locale files or only German/English?**
    - What we know: Existing locale files are runtime JSON files under `public/locales/*/image_adv.json`. [VERIFIED: find public/locales]
-   - What's unclear: The project has no explicit fallback policy for newly introduced copy across all existing locales. [ASSUMED]
-   - Recommendation: Add keys to all locale files to avoid missing runtime keys, using German for `de-DE` and English fallback wording elsewhere unless product localization is available. [ASSUMED]
+   - Resolution: Plan 02 adds keys to every existing `image_adv.json` via deterministic `scripts/addOpenVerseLocaleKeys.cjs`, using German for `de-DE` and English fallback copy elsewhere because product-reviewed translations are not available in this phase. [RESOLVED: 02-02-PLAN.md]
 
 ## Environment Availability
 
