@@ -68,7 +68,7 @@ describe('importOpenVerseImage', () => {
         expect(DEFAULT_OPENVERSE_IMPORT_MAX_SIZE).toBe(512);
     });
 
-    it('loads a remote image into a readable styled canvas', async ({ expect }) => {
+    it('loads a remote image into a readable styled canvas with getImageData(0, 0, 1, 1)', async ({ expect }) => {
         imageBehaviors.push({ type: 'load', width: 200, height: 100 });
 
         const canvas = await importOpenVerseImage({ imageUrl: 'https://example.test/image.jpg' });
