@@ -127,8 +127,7 @@ export type OpenVerseSearchErrorCode =
     | 'network'
     | 'rate-limited'
     | 'http'
-    | 'invalid-response'
-    | 'no-results';
+    | 'invalid-response';
 ```
 
 Recommended class:
@@ -161,7 +160,7 @@ export class OpenVerseSearchError extends Error {
    - if `signal?.aborted`, rethrow the abort error or map cleanly so callers can ignore stale searches.
    - otherwise map to `network`.
 10. Parse JSON and validate enough shape before normalizing.
-11. Return `no-results` error or a successful result with empty array? Recommendation: return successful empty `results` for valid empty responses; reserve `no-results` only if planner wants UI to handle empty as typed error. Requirements mention empty results as recoverable client errors, so include the code and document behavior in tests.
+11. Return a successful empty `results` array for valid empty responses. Use `invalid-response` only for malformed response shapes.
 
 ### Normalization Rules
 
@@ -267,7 +266,7 @@ Required cases:
 6. Non-OK non-429 response throws `code === 'http'` with status.
 7. Rejected fetch throws `code === 'network'`.
 8. Missing or malformed `results` throws `code === 'invalid-response'`.
-9. Empty `results` maps to the chosen empty/no-results contract.
+9. Empty `results` returns a successful `OpenVerseImageSearchResult` with `results.length === 0`.
 10. Malformed entries are dropped, but all-malformed result arrays throw `invalid-response`.
 
 ### `src/util/openverseImageImport.test.ts`
@@ -321,7 +320,7 @@ Nyquist dimensions for Phase 1:
 
 Recommended validation commands:
 
-- `npm test -- src/util/openverse.test.ts src/util/openverseImageImport.test.ts`
+- `npm test -- src/util/openverse.test.ts src/util/openverseImageImport.test.ts --run`
 - `npm run lint`
 - `npm run build`
 
@@ -357,11 +356,11 @@ No expected changes to:
 
 Those belong to later phases.
 
-## Open Questions for Executor
+## Open Questions (RESOLVED)
 
-- Whether `no-results` should be represented as a successful empty result or a typed error. Requirement wording permits a recoverable typed case; the plan should pick one and test it. Recommended: successful empty result for valid API responses, `invalid-response` for malformed responses.
-- Whether fallback to thumbnail should be enabled by default in the importer. Recommended: allow `fallbackUrl`, but only Phase 2/3 decides whether to pass thumbnails as fallback.
-- Exact max canvas size. Recommended: `512` px longest edge for Phase 1 unless existing classifier constraints suggest otherwise.
+- RESOLVED: Valid empty OpenVerse responses return a successful empty `results` array. The `OpenVerseSearchErrorCode` union does not include `no-results`; malformed response shapes throw `OpenVerseSearchError` with `code === 'invalid-response'`.
+- RESOLVED: The importer supports an optional `fallbackUrl`, but it does not automatically invent a thumbnail fallback. Later UI/integration phases decide whether to pass the OpenVerse thumbnail as fallback.
+- RESOLVED: Phase 1 uses `DEFAULT_OPENVERSE_IMPORT_MAX_SIZE = 512` as the maximum longest-edge canvas size unless a later implementation finding requires a documented change.
 
 ## Summary
 

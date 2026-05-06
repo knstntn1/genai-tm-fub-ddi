@@ -19,7 +19,7 @@ created: 2026-05-06
 |----------|-------|
 | **Framework** | Vitest 3.1.1 with jsdom |
 | **Config file** | `vite.config.ts`, `src/setupTests.ts` |
-| **Quick run command** | `npm test -- src/util/openverse.test.ts src/util/openverseImageImport.test.ts` |
+| **Quick run command** | `npm test -- src/util/openverse.test.ts src/util/openverseImageImport.test.ts --run` |
 | **Full suite command** | `npm run ci:test` |
 | **Estimated runtime** | ~60 seconds for focused tests; full suite runtime depends on CI environment |
 
@@ -27,7 +27,7 @@ created: 2026-05-06
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npm test -- src/util/openverse.test.ts src/util/openverseImageImport.test.ts`
+- **After every task commit:** Run `npm test -- src/util/openverse.test.ts src/util/openverseImageImport.test.ts --run`
 - **After every plan wave:** Run `npm run lint && npm run build && npm run ci:test`
 - **Before `$gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 120 seconds for focused utility tests
@@ -38,10 +38,10 @@ created: 2026-05-06
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 1-01-01 | 01 | 1 | OVAPI-01, OVAPI-02, OVAPI-05 | T-1-01 | OpenVerse search sends only public unauthenticated browser requests with `mature=false` | unit | `npm test -- src/util/openverse.test.ts` | ✅ | ⬜ pending |
-| 1-01-02 | 01 | 1 | OVAPI-03, OVAPI-04, TEST-01 | T-1-02 | OpenVerse responses and failures are normalized into stable app-owned types | unit | `npm test -- src/util/openverse.test.ts` | ✅ | ⬜ pending |
-| 1-02-01 | 02 | 1 | IMPORT-01, IMPORT-04 | T-1-03 | Remote image imports are bounded before becoming training samples | unit | `npm test -- src/util/openverseImageImport.test.ts` | ✅ | ⬜ pending |
-| 1-02-02 | 02 | 1 | IMPORT-02, IMPORT-03, IMPORT-05, TEST-02 | T-1-04 | Tainted, failed, timed-out, aborted, or duplicate-pending image imports return typed failures and no sample mutation path | unit | `npm test -- src/util/openverseImageImport.test.ts` | ✅ | ⬜ pending |
+| 1-01-01 | 01 | 1 | OVAPI-01, OVAPI-02, OVAPI-05 | T-1-01 | OpenVerse search sends only public unauthenticated browser requests with `mature=false` | unit | `npm test -- src/util/openverse.test.ts --run` | ✅ | ⬜ pending |
+| 1-01-02 | 01 | 1 | OVAPI-03, OVAPI-04, TEST-01 | T-1-02 | OpenVerse responses and failures are normalized into stable app-owned types | unit | `npm test -- src/util/openverse.test.ts --run` | ✅ | ⬜ pending |
+| 1-02-01 | 02 | 1 | IMPORT-01, IMPORT-04 | T-1-03 | Remote image imports are bounded before becoming training samples | unit | `npm test -- src/util/openverseImageImport.test.ts --run` | ✅ | ⬜ pending |
+| 1-02-02 | 02 | 1 | IMPORT-02, IMPORT-03, IMPORT-05, TEST-02 | T-1-04 | Tainted, failed, timed-out, aborted, or duplicate-pending image imports return typed failures and no sample mutation path | unit | `npm test -- src/util/openverseImageImport.test.ts --run` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

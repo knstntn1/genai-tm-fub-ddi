@@ -29,7 +29,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The system reports recoverable typed errors for empty results, invalid responses, network failures, and rate limiting.
   4. The system converts a selected remote image into the same readable canvas/sample representation used by existing image training samples, with size bounds applied.
   5. Failed loads, CORS/canvas-taint failures, decode failures, timeouts, and duplicate pending imports do not create partial samples or mutate class sample state.
-**Plans**: TBD
+**Plans**:
+- `01-01-PLAN.md` - OpenVerse API Client
+- `01-02-PLAN.md` - Remote Image Import Boundary
 
 ### Phase 2: Student Search UI
 **Goal**: Students can open a simple class-scoped OpenVerse search experience, submit a query, browse image-only results, and understand loading, empty, error, import, and pagination states.
@@ -76,7 +78,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. OpenVerse Client & Import Boundary | 0/TBD | Not started | - |
+| 1. OpenVerse Client & Import Boundary | 2/2 | Ready to execute | - |
 | 2. Student Search UI | 0/TBD | Not started | - |
 | 3. Training Workflow Integration | 0/TBD | Not started | - |
 | 4. Live Browser Validation | 0/TBD | Not started | - |
