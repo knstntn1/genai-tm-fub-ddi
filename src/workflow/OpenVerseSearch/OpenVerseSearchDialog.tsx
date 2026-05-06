@@ -24,6 +24,11 @@ type SearchClient = (options: SearchOpenVerseImagesOptions) => Promise<OpenVerse
 
 type SearchStatus = 'idle' | 'loading' | 'loading-more' | 'results' | 'empty' | 'error' | 'rate-limited';
 
+interface RetryRequest {
+    query: string;
+    page: number;
+}
+
 interface Props {
     open: boolean;
     className: string;
@@ -47,6 +52,7 @@ export default function OpenVerseSearchDialog({
     const [page, setPage] = useState(0);
     const [pageCount, setPageCount] = useState(0);
     const [status, setStatus] = useState<SearchStatus>('idle');
+    const [retryRequest, setRetryRequest] = useState<RetryRequest | null>(null);
     const [showEmptyQuery, setShowEmptyQuery] = useState(false);
     const [pendingUseIds, setPendingUseIds] = useState<Set<string>>(() => new Set());
     const [failedUseIds, setFailedUseIds] = useState<Set<string>>(() => new Set());
@@ -70,6 +76,7 @@ export default function OpenVerseSearchDialog({
             activeSearch.current = controller;
             const currentRequestId = requestId.current;
 
+            setRetryRequest({ query: nextQuery, page: nextPage });
             setShowEmptyQuery(false);
             setStatus(nextPage === 1 ? 'loading' : 'loading-more');
 
@@ -88,12 +95,14 @@ export default function OpenVerseSearchDialog({
                 setPage(response.page);
                 setPageCount(response.pageCount);
                 setSubmittedQuery(nextQuery);
+                setRetryRequest(null);
                 setStatus(response.results.length === 0 && nextPage === 1 ? 'empty' : 'results');
             } catch (error) {
                 if (controller.signal.aborted || currentRequestId !== requestId.current) return;
 
                 if (error instanceof OpenVerseSearchError && error.code === 'empty-query') {
                     setShowEmptyQuery(true);
+                    setRetryRequest(null);
                     setStatus(results.length > 0 ? 'results' : 'idle');
                     return;
                 }
@@ -134,11 +143,10 @@ export default function OpenVerseSearchDialog({
     );
 
     const handleRetry = useCallback(() => {
-        const retryQuery = submittedQuery || query.trim();
-        if (retryQuery.length === 0 || isSearching) return;
+        if (!retryRequest || isSearching) return;
 
-        void runSearch(retryQuery, page > 0 ? page : 1);
-    }, [isSearching, page, query, runSearch, submittedQuery]);
+        void runSearch(retryRequest.query, retryRequest.page);
+    }, [isSearching, retryRequest, runSearch]);
 
     const handleLoadMore = useCallback(() => {
         if (!canLoadMore || submittedQuery.length === 0) return;

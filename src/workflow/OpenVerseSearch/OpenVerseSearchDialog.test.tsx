@@ -275,6 +275,61 @@ describe('OpenVerseSearchDialog', () => {
         });
     });
 
+    it('retries the failed query instead of the previous successful query', async ({ expect }) => {
+        const user = userEvent.setup();
+        const searchClient = vi
+            .fn()
+            .mockResolvedValueOnce(searchResponse([catResult], 1, 1))
+            .mockRejectedValueOnce(new OpenVerseSearchError('network', 'failed'))
+            .mockResolvedValueOnce(searchResponse([dogResult], 1, 1));
+        renderDialog(searchClient);
+
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        expect(await screen.findByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
+
+        await user.clear(screen.getByLabelText('Suchbegriff'));
+        await user.type(screen.getByLabelText('Suchbegriff'), 'hund');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        expect(await screen.findByText('Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.')).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Erneut versuchen' }));
+
+        expect(await screen.findByRole('img', { name: 'Dog Metadata' })).toBeInTheDocument();
+        expect(searchClient).toHaveBeenLastCalledWith({
+            query: 'hund',
+            page: 1,
+            signal: expect.any(AbortSignal),
+        });
+    });
+
+    it('retries a failed next-page request and appends the recovered page', async ({ expect }) => {
+        const user = userEvent.setup();
+        const searchClient = vi
+            .fn()
+            .mockResolvedValueOnce(searchResponse([catResult], 1, 2))
+            .mockRejectedValueOnce(new OpenVerseSearchError('http', 'failed'))
+            .mockResolvedValueOnce(searchResponse([dogResult], 2, 2));
+        renderDialog(searchClient);
+
+        await user.type(screen.getByLabelText('Suchbegriff'), 'tier');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        expect(await screen.findByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Mehr Ergebnisse' }));
+        expect(await screen.findByText('Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.')).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Erneut versuchen' }));
+
+        expect(await screen.findByRole('img', { name: 'Dog Metadata' })).toBeInTheDocument();
+        expect(screen.getByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
+        expect(searchClient).toHaveBeenLastCalledWith({
+            query: 'tier',
+            page: 2,
+            signal: expect.any(AbortSignal),
+        });
+    });
+
     it('shows failed-use state and keeps Phase 2 free of class-state/import mutation code', async ({ expect }) => {
         const user = userEvent.setup();
         const searchClient = vi.fn().mockResolvedValue(searchResponse([catResult]));
