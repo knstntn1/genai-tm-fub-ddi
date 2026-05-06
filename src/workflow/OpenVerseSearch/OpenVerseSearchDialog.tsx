@@ -267,6 +267,16 @@ export default function OpenVerseSearchDialog({
                                 : t('trainingdata.openverse.retryableError')}
                         </Alert>
                     )}
+
+                    {status === 'loading-more' && (
+                        <div
+                            className={styles.loadingMore}
+                            role="status"
+                        >
+                            <CircularProgress size={20} />
+                            <Typography>{t('trainingdata.openverse.loadingMore')}</Typography>
+                        </div>
+                    )}
                 </div>
 
                 {results.length > 0 && (
@@ -302,13 +312,6 @@ export default function OpenVerseSearchDialog({
                                 </button>
                             );
                         })}
-                    </div>
-                )}
-
-                {status === 'loading-more' && (
-                    <div className={styles.loadingMore}>
-                        <CircularProgress size={20} />
-                        <Typography>{t('trainingdata.openverse.loadingMore')}</Typography>
                     </div>
                 )}
 

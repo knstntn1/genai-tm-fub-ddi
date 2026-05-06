@@ -330,6 +330,23 @@ describe('OpenVerseSearchDialog', () => {
         });
     });
 
+    it('announces loading additional results', async ({ expect }) => {
+        const user = userEvent.setup();
+        const searchClient = vi
+            .fn()
+            .mockResolvedValueOnce(searchResponse([catResult], 1, 2))
+            .mockImplementationOnce(() => new Promise<OpenVerseImageSearchResult>(() => {}));
+        renderDialog(searchClient);
+
+        await user.type(screen.getByLabelText('Suchbegriff'), 'tier');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        expect(await screen.findByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Mehr Ergebnisse' }));
+
+        expect(await screen.findByRole('status')).toHaveTextContent('Weitere Bilder werden geladen...');
+    });
+
     it('shows failed-use state and keeps Phase 2 free of class-state/import mutation code', async ({ expect }) => {
         const user = userEvent.setup();
         const searchClient = vi.fn().mockResolvedValue(searchResponse([catResult]));
