@@ -93,39 +93,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OVAPI-01 | TBD | Pending |
-| OVAPI-02 | TBD | Pending |
-| OVAPI-03 | TBD | Pending |
-| OVAPI-04 | TBD | Pending |
-| OVAPI-05 | TBD | Pending |
-| IMPORT-01 | TBD | Pending |
-| IMPORT-02 | TBD | Pending |
-| IMPORT-03 | TBD | Pending |
-| IMPORT-04 | TBD | Pending |
-| IMPORT-05 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| UI-04 | TBD | Pending |
-| UI-05 | TBD | Pending |
-| UI-06 | TBD | Pending |
-| UI-07 | TBD | Pending |
-| UI-08 | TBD | Pending |
-| TRAIN-01 | TBD | Pending |
-| TRAIN-02 | TBD | Pending |
-| TRAIN-03 | TBD | Pending |
-| TRAIN-04 | TBD | Pending |
-| TRAIN-05 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| TEST-05 | TBD | Pending |
+| OVAPI-01 | Phase 1 | Pending |
+| OVAPI-02 | Phase 1 | Pending |
+| OVAPI-03 | Phase 1 | Pending |
+| OVAPI-04 | Phase 1 | Pending |
+| OVAPI-05 | Phase 1 | Pending |
+| IMPORT-01 | Phase 1 | Pending |
+| IMPORT-02 | Phase 1 | Pending |
+| IMPORT-03 | Phase 1 | Pending |
+| IMPORT-04 | Phase 1 | Pending |
+| IMPORT-05 | Phase 1 | Pending |
+| UI-01 | Phase 3 | Pending |
+| UI-02 | Phase 2 | Pending |
+| UI-03 | Phase 2 | Pending |
+| UI-04 | Phase 2 | Pending |
+| UI-05 | Phase 2 | Pending |
+| UI-06 | Phase 2 | Pending |
+| UI-07 | Phase 2 | Pending |
+| UI-08 | Phase 2 | Pending |
+| TRAIN-01 | Phase 3 | Pending |
+| TRAIN-02 | Phase 3 | Pending |
+| TRAIN-03 | Phase 3 | Pending |
+| TRAIN-04 | Phase 3 | Pending |
+| TRAIN-05 | Phase 3 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 1 | Pending |
+| TEST-03 | Phase 2 | Pending |
+| TEST-04 | Phase 3 | Pending |
+| TEST-05 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 28 total
-- Mapped to phases: 0
-- Unmapped: 28
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-06*
