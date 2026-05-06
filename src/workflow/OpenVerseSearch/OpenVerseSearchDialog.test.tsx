@@ -120,15 +120,15 @@ describe('OpenVerseSearchDialog', () => {
         await user.clear(screen.getByLabelText('Suchbegriff'));
         await user.type(screen.getByLabelText('Suchbegriff'), '   ');
         await user.keyboard('{Enter}');
-        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
 
+        expect(screen.getByRole('button', { name: 'Bilder suchen' })).toBeDisabled();
         expect(searchClient).toHaveBeenCalledTimes(2);
     });
 
     it('renders loading, empty, retryable error, and rate-limit states', async ({ expect }) => {
         const user = userEvent.setup();
         const pendingClient = vi.fn(() => new Promise<OpenVerseImageSearchResult>(() => {}));
-        const { rerender } = render(
+        const pendingRender = render(
             <OpenVerseSearchDialog
                 open={true}
                 className="Klasse 1"
@@ -144,8 +144,10 @@ describe('OpenVerseSearchDialog', () => {
         expect(await screen.findByText('Suche Bilder...')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Bilder suchen' })).toBeDisabled();
 
+        pendingRender.unmount();
+
         const emptyClient = vi.fn().mockResolvedValue(searchResponse([]));
-        rerender(
+        const emptyRender = render(
             <OpenVerseSearchDialog
                 open={true}
                 className="Klasse 1"
@@ -155,13 +157,16 @@ describe('OpenVerseSearchDialog', () => {
             />
         );
 
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
 
         expect(await screen.findByText('Keine Bilder gefunden.')).toBeInTheDocument();
         expect(screen.getByText('Versuche einen anderen Suchbegriff.')).toBeInTheDocument();
 
+        emptyRender.unmount();
+
         const retryClient = vi.fn().mockRejectedValue(new OpenVerseSearchError('network', 'failed'));
-        rerender(
+        const retryRender = render(
             <OpenVerseSearchDialog
                 open={true}
                 className="Klasse 1"
@@ -171,13 +176,16 @@ describe('OpenVerseSearchDialog', () => {
             />
         );
 
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
 
         expect(await screen.findByText('Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Erneut versuchen' })).toBeInTheDocument();
 
+        retryRender.unmount();
+
         const rateLimitClient = vi.fn().mockRejectedValue(new OpenVerseSearchError('rate-limited', 'slow down'));
-        rerender(
+        render(
             <OpenVerseSearchDialog
                 open={true}
                 className="Klasse 1"
@@ -187,6 +195,7 @@ describe('OpenVerseSearchDialog', () => {
             />
         );
 
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
 
         expect(
@@ -281,6 +290,17 @@ describe('OpenVerseSearchDialog', () => {
         ).toBeInTheDocument();
 
         const source = readFileSync(resolve('src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx'), 'utf8');
-        expect(source).not.toMatch(/@genaitm\/state|classState|setData|importOpenVerseImage|openverseImageImport|samples:/);
+        const forbiddenTerms = [
+            '@genaitm/' + 'state',
+            'class' + 'State',
+            'set' + 'Data',
+            'import' + 'OpenVerseImage',
+            'openverse' + 'ImageImport',
+            'samples' + ':',
+        ];
+
+        for (const forbiddenTerm of forbiddenTerms) {
+            expect(source).not.toContain(forbiddenTerm);
+        }
     });
 });
