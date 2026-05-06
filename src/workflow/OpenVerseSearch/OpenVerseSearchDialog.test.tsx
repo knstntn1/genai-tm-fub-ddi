@@ -23,12 +23,12 @@ vi.mock('react-i18next', () => ({
                 'trainingdata.openverse.retryableError': 'Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.',
                 'trainingdata.openverse.rateLimit':
                     'Gerade sind zu viele Suchanfragen aktiv. Versuche es gleich noch einmal.',
-                'trainingdata.openverse.retryAction': 'Erneut versuchen',
-                'trainingdata.openverse.moreResults': 'Mehr Ergebnisse',
+                'trainingdata.openverse.retry': 'Erneut versuchen',
+                'trainingdata.openverse.more': 'Mehr Ergebnisse',
                 'trainingdata.openverse.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
                 'trainingdata.openverse.emptyQuery': 'Gib zuerst einen Suchbegriff ein.',
-                'trainingdata.openverse.close': 'Schließen',
-                'trainingdata.openverse.resultFallback': 'OpenVerse Bild',
+                'trainingdata.aria.close': 'Schließen',
+                'trainingdata.openverse.fallbackAlt': 'OpenVerse Bild',
             };
             return copy[key] ?? key;
         },

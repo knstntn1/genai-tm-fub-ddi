@@ -189,7 +189,7 @@ export default function OpenVerseSearchDialog({
                 {t('trainingdata.openverse.title', { className })}
                 <IconButton
                     onClick={handleClose}
-                    aria-label={t('trainingdata.openverse.close')}
+                    aria-label={t('trainingdata.aria.close')}
                     className={styles.closeButton}
                 >
                     <CloseIcon />
@@ -250,7 +250,7 @@ export default function OpenVerseSearchDialog({
                                     onClick={handleRetry}
                                     disabled={isSearching}
                                 >
-                                    {t('trainingdata.openverse.retryAction')}
+                                    {t('trainingdata.openverse.retry')}
                                 </Button>
                             }
                         >
@@ -266,7 +266,7 @@ export default function OpenVerseSearchDialog({
                         {results.map((result) => {
                             const isPending = pendingUseIds.has(result.id);
                             const hasFailed = failedUseIds.has(result.id);
-                            const accessibleTitle = result.title || t('trainingdata.openverse.resultFallback');
+                            const accessibleTitle = result.title || t('trainingdata.openverse.fallbackAlt');
 
                             return (
                                 <button
@@ -311,7 +311,7 @@ export default function OpenVerseSearchDialog({
                             onClick={handleLoadMore}
                             disabled={isSearching}
                         >
-                            {t('trainingdata.openverse.moreResults')}
+                            {t('trainingdata.openverse.more')}
                         </Button>
                     </div>
                 )}
