@@ -105,16 +105,16 @@ async function loadImage(
         };
 
         image.onload = () => {
-            finish(async () => {
+            void (async () => {
                 try {
                     if (image.decode) {
                         await image.decode();
                     }
-                    resolve(image);
+                    finish(() => resolve(image));
                 } catch {
-                    reject(toImportError('decode-failed', sourceUrl));
+                    finish(() => reject(toImportError('decode-failed', sourceUrl)));
                 }
-            });
+            })();
         };
         image.onerror = () => {
             finish(() => reject(toImportError('load-failed', sourceUrl)));
@@ -162,6 +162,9 @@ async function importWithLoader(
     signal?: AbortSignal
 ): Promise<HTMLCanvasElement> {
     const image = await loader(url, signal);
+    if (signal?.aborted) {
+        throw toImportError('aborted', image.currentSrc || image.src || url);
+    }
     return canvasFromImage(image, maxSize);
 }
 

@@ -13,6 +13,7 @@ interface ImageBehavior {
     width?: number;
     height?: number;
     decodeReject?: boolean;
+    decodePromise?: Promise<void>;
 }
 
 const imageBehaviors: ImageBehavior[] = [];
@@ -31,6 +32,7 @@ class MockImage {
     currentSrc = '';
     private srcUrl = '';
     decodeReject = false;
+    decodePromise?: Promise<void>;
     decode = vi.fn(() => (this.decodeReject ? Promise.reject(new Error('decode failed')) : Promise.resolve()));
 
     get src() {
@@ -47,6 +49,10 @@ class MockImage {
         this.width = this.naturalWidth;
         this.height = this.naturalHeight;
         this.decodeReject = behavior.decodeReject ?? false;
+        this.decodePromise = behavior.decodePromise;
+        this.decode = vi.fn(() =>
+            this.decodePromise ?? (this.decodeReject ? Promise.reject(new Error('decode failed')) : Promise.resolve())
+        );
 
         queueMicrotask(() => {
             if (behavior.type === 'error') {
@@ -172,6 +178,30 @@ describe('importOpenVerseImage', () => {
         ).rejects.toMatchObject({
             code: 'aborted',
             sourceUrl: 'https://example.test/aborted.jpg',
+        });
+    });
+
+    it('rejects abort signals that fire while decode is pending', async ({ expect }) => {
+        const controller = new AbortController();
+        let resolveDecode!: () => void;
+        imageBehaviors.push({
+            type: 'load',
+            decodePromise: new Promise((resolve) => {
+                resolveDecode = resolve;
+            }),
+        });
+
+        const promise = importOpenVerseImage({
+            imageUrl: 'https://example.test/pending-decode.jpg',
+            signal: controller.signal,
+        });
+        await Promise.resolve();
+        controller.abort();
+        resolveDecode();
+
+        await expect(promise).rejects.toMatchObject({
+            code: 'aborted',
+            sourceUrl: 'https://example.test/pending-decode.jpg',
         });
     });
 

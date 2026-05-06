@@ -48,6 +48,30 @@ describe('OpenVerse image search client', () => {
         expect(fetchMock.mock.calls[0][1]).toEqual({ signal: undefined });
     });
 
+    it('uses default pagination when callers pass NaN pagination values', async ({ expect }) => {
+        global.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () =>
+                    Promise.resolve({
+                        page: 1,
+                        page_count: 1,
+                        page_size: DEFAULT_OPENVERSE_PAGE_SIZE,
+                        result_count: 0,
+                        results: [],
+                    }),
+            } as Response)
+        ) as unknown as typeof fetch;
+
+        await searchOpenVerseImages({ query: 'Katze', page: Number.NaN, pageSize: Number.NaN });
+
+        const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+        const requestUrl = new URL(String(fetchMock.mock.calls[0][0]));
+
+        expect(requestUrl.searchParams.get('page')).toBe('1');
+        expect(requestUrl.searchParams.get('page_size')).toBe(String(DEFAULT_OPENVERSE_PAGE_SIZE));
+    });
+
     it('normalizes successful OpenVerse image results into local fields', async ({ expect }) => {
         global.fetch = vi.fn(() =>
             Promise.resolve({

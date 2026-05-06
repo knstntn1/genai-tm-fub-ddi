@@ -90,8 +90,8 @@ export async function searchOpenVerseImages(
         throw new OpenVerseSearchError('empty-query', 'OpenVerse search query must not be empty.');
     }
 
-    const page = Math.max(1, Math.floor(options.page ?? 1));
-    const pageSize = Math.min(50, Math.max(1, Math.floor(options.pageSize ?? DEFAULT_OPENVERSE_PAGE_SIZE)));
+    const page = Math.max(1, integerOrFallback(options.page, 1));
+    const pageSize = Math.min(50, Math.max(1, integerOrFallback(options.pageSize, DEFAULT_OPENVERSE_PAGE_SIZE)));
     const url = new URL(OPENVERSE_IMAGES_URL);
     url.searchParams.set('q', query);
     url.searchParams.set('page', String(page));
@@ -212,6 +212,10 @@ function addStringField<T extends 'source' | 'foreignLandingUrl' | 'license' | '
 
 function numberOrFallback(value: unknown, fallback: number): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function integerOrFallback(value: number | undefined, fallback: number): number {
+    return typeof value === 'number' && Number.isFinite(value) ? Math.floor(value) : fallback;
 }
 
 function isString(value: unknown): value is string {
