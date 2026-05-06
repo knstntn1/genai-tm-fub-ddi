@@ -65,7 +65,10 @@ describe('importOpenVerseImage', () => {
         drawImage = vi.fn();
         getImageData = vi.fn();
         vi.stubGlobal('Image', MockImage);
-        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext') as unknown as {
+            mockReturnValue: (value: CanvasRenderingContext2D) => void;
+        };
+        getContextSpy.mockReturnValue({
             drawImage,
             getImageData,
         } as unknown as CanvasRenderingContext2D);
