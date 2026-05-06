@@ -106,6 +106,25 @@
             "more": "mehr Optionen",
             "close": "Schließen",
             "classCard": "Trainingsdaten für {{name}}"
+        },
+        "openverse": {
+            "title": "OpenVerse: {{className}}",
+            "searchLabel": "Suchbegriff",
+            "searchPlaceholder": "z. B. Katze",
+            "searchAction": "Bilder suchen",
+            "useImage": "Dieses Bild nutzen",
+            "initial": "Suche nach Bildern für diese Klasse.",
+            "loading": "Suche Bilder...",
+            "loadingMore": "Weitere Bilder werden geladen...",
+            "emptyQuery": "Gib einen Suchbegriff ein.",
+            "emptyTitle": "Keine Bilder gefunden.",
+            "emptyBody": "Versuche einen anderen Suchbegriff.",
+            "retryableError": "Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.",
+            "rateLimit": "Gerade sind zu viele Suchanfragen aktiv. Versuche es gleich noch einmal.",
+            "retry": "Erneut versuchen",
+            "more": "Mehr Ergebnisse",
+            "failedUse": "Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.",
+            "fallbackAlt": "OpenVerse Bild"
         }
     },
     "heatmap": {
