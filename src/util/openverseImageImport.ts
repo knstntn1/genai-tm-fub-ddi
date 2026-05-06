@@ -174,7 +174,10 @@ export async function importOpenVerseImage(options: ImportOpenVerseImageOptions)
     try {
         return await importWithLoader(options.imageUrl, loader, maxSize, options.signal);
     } catch (error) {
-        if (error instanceof OpenVerseImageImportError && error.code === 'aborted') {
+        if (
+            error instanceof OpenVerseImageImportError &&
+            (error.code === 'aborted' || error.code === 'unsupported-image')
+        ) {
             throw error;
         }
         if (!options.fallbackUrl) {
