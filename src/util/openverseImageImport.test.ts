@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
     importOpenVerseImage,
     OpenVerseImageImportError,
@@ -7,9 +9,10 @@ import {
 } from './openverseImageImport';
 
 type ImageBehavior = {
-    type: 'load' | 'error';
+    type: 'load' | 'error' | 'stall';
     width?: number;
     height?: number;
+    decodeReject?: boolean;
 };
 
 const imageBehaviors: ImageBehavior[] = [];
@@ -25,20 +28,30 @@ class MockImage {
     naturalHeight = 0;
     width = 0;
     height = 0;
-    decode = vi.fn(() => Promise.resolve());
+    currentSrc = '';
+    private srcUrl = '';
+    decodeReject = false;
+    decode = vi.fn(() => (this.decodeReject ? Promise.reject(new Error('decode failed')) : Promise.resolve()));
+
+    get src() {
+        return this.srcUrl;
+    }
 
     set src(url: string) {
         loadedUrls.push(url);
+        this.srcUrl = url;
+        this.currentSrc = url;
         const behavior = imageBehaviors.shift() ?? { type: 'load', width: 100, height: 100 };
         this.naturalWidth = behavior.width ?? 100;
         this.naturalHeight = behavior.height ?? 100;
         this.width = this.naturalWidth;
         this.height = this.naturalHeight;
+        this.decodeReject = behavior.decodeReject ?? false;
 
         queueMicrotask(() => {
             if (behavior.type === 'error') {
                 this.onerror?.(new Event('error'));
-            } else {
+            } else if (behavior.type === 'load') {
                 this.onload?.(new Event('load'));
             }
         });
@@ -115,5 +128,89 @@ describe('importOpenVerseImage', () => {
         expect(error).toBeInstanceOf(Error);
         expect(error.code).toBe('load-failed');
         expect(error.sourceUrl).toBe('https://example.test/image.jpg');
+    });
+
+    it('rejects load failures with a typed load-failed error', async ({ expect }) => {
+        imageBehaviors.push({ type: 'error' });
+
+        await expect(importOpenVerseImage({ imageUrl: 'https://example.test/missing.jpg' })).rejects.toMatchObject({
+            code: 'load-failed',
+            sourceUrl: 'https://example.test/missing.jpg',
+        });
+    });
+
+    it('rejects stalled image loads with a typed timeout error', async ({ expect }) => {
+        vi.useFakeTimers();
+        imageBehaviors.push({ type: 'stall' });
+
+        const promise = importOpenVerseImage({
+            imageUrl: 'https://example.test/slow.jpg',
+            timeoutMs: 50,
+        });
+        const rejection = expect(promise).rejects.toMatchObject({
+            code: 'timeout',
+            sourceUrl: 'https://example.test/slow.jpg',
+        });
+        await vi.advanceTimersByTimeAsync(50);
+
+        await rejection;
+        vi.useRealTimers();
+    });
+
+    it('rejects abort signals with a typed aborted error', async ({ expect }) => {
+        const controller = new AbortController();
+        controller.abort();
+
+        await expect(
+            importOpenVerseImage({
+                imageUrl: 'https://example.test/aborted.jpg',
+                signal: controller.signal,
+            })
+        ).rejects.toMatchObject({
+            code: 'aborted',
+            sourceUrl: 'https://example.test/aborted.jpg',
+        });
+    });
+
+    it('rejects decode failures with a typed decode-failed error', async ({ expect }) => {
+        imageBehaviors.push({ type: 'load', decodeReject: true });
+
+        await expect(importOpenVerseImage({ imageUrl: 'https://example.test/bad-decode.jpg' })).rejects.toMatchObject({
+            code: 'decode-failed',
+            sourceUrl: 'https://example.test/bad-decode.jpg',
+        });
+    });
+
+    it('rejects SecurityError readback failures with a typed canvas-unreadable error', async ({ expect }) => {
+        imageBehaviors.push({ type: 'load' });
+        getImageData.mockImplementation(() => {
+            throw new DOMException('The canvas has been tainted', 'SecurityError');
+        });
+
+        await expect(importOpenVerseImage({ imageUrl: 'https://example.test/tainted.jpg' })).rejects.toMatchObject({
+            code: 'canvas-unreadable',
+            sourceUrl: 'https://example.test/tainted.jpg',
+        });
+    });
+
+    it('rejects unsupported missing image URLs without using fallbackUrl', async ({ expect }) => {
+        imageBehaviors.push({ type: 'load' });
+
+        await expect(
+            importOpenVerseImage({
+                imageUrl: '',
+                fallbackUrl: 'https://example.test/fallback.jpg',
+            })
+        ).rejects.toMatchObject({
+            code: 'unsupported-image',
+        });
+        expect(loadedUrls).toEqual([]);
+    });
+
+    it('keeps duplicate-pending prevention and class state mutation out of the import boundary', ({ expect }) => {
+        const source = readFileSync(resolve('src/util/openverseImageImport.ts'), 'utf8');
+
+        expect(source).not.toMatch(/@genaitm\/state|classState|setData|samples:/);
+        expect(source).not.toMatch(/Set<|new Set|Map<|new Map|pending|importing/);
     });
 });
