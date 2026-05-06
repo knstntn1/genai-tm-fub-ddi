@@ -8,12 +8,12 @@ import {
     DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS,
 } from './openverseImageImport';
 
-type ImageBehavior = {
+interface ImageBehavior {
     type: 'load' | 'error' | 'stall';
     width?: number;
     height?: number;
     decodeReject?: boolean;
-};
+}
 
 const imageBehaviors: ImageBehavior[] = [];
 const loadedUrls: string[] = [];

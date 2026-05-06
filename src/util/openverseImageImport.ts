@@ -87,7 +87,6 @@ async function loadImage(
     return new Promise((resolve, reject) => {
         const image = new Image();
         let settled = false;
-        let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
         const finish = (callback: () => void) => {
             if (settled) {
@@ -121,7 +120,7 @@ async function loadImage(
             finish(() => reject(toImportError('load-failed', sourceUrl)));
         };
 
-        timeoutId = setTimeout(() => {
+        const timeoutId = setTimeout(() => {
             finish(() => reject(toImportError('timeout', sourceUrl)));
         }, timeoutMs);
 
