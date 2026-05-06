@@ -25,7 +25,14 @@ describe('OpenVerse image search client', () => {
                         page_count: 3,
                         page_size: DEFAULT_OPENVERSE_PAGE_SIZE,
                         result_count: 45,
-                        results: [],
+                        results: [
+                            {
+                                id: 'abc',
+                                title: 'Katze',
+                                url: 'https://images.example/cat.jpg',
+                                thumbnail: 'https://images.example/cat-thumb.jpg',
+                            },
+                        ],
                     }),
             } as Response)
         ) as unknown as typeof fetch;

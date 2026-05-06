@@ -43,6 +43,8 @@ interface OpenVerseSearchErrorOptions {
     retryAfter?: string;
 }
 
+type JsonRecord = Record<string, unknown>;
+
 interface OpenVerseApiResult {
     id?: unknown;
     title?: unknown;
@@ -96,53 +98,97 @@ export async function searchOpenVerseImages(
     url.searchParams.set('page_size', String(pageSize));
     url.searchParams.set('mature', 'false');
 
-    const response = await fetch(url.toString(), { signal: options.signal });
-    const json = (await response.json()) as OpenVerseApiResponse;
+    let response: Response;
+    try {
+        response = await fetch(url.toString(), { signal: options.signal });
+    } catch (fetchError) {
+        if (options.signal?.aborted) {
+            throw fetchError;
+        }
+        throw new OpenVerseSearchError('network', 'OpenVerse search request failed.');
+    }
+
+    if (!response.ok) {
+        if (response.status === 429) {
+            throw new OpenVerseSearchError('rate-limited', 'OpenVerse search rate limit reached.', {
+                status: response.status,
+                retryAfter: response.headers.get('Retry-After') ?? undefined,
+            });
+        }
+        throw new OpenVerseSearchError('http', `OpenVerse search failed with status ${response.status}.`, {
+            status: response.status,
+        });
+    }
+
+    let json: OpenVerseApiResponse;
+    try {
+        json = (await response.json()) as OpenVerseApiResponse;
+    } catch {
+        throw new OpenVerseSearchError('invalid-response', 'OpenVerse search returned invalid JSON.');
+    }
 
     return normalizeSearchResponse(json, page, pageSize);
 }
 
 function normalizeSearchResponse(
-    response: OpenVerseApiResponse,
+    response: unknown,
     fallbackPage: number,
     fallbackPageSize: number
 ): OpenVerseImageSearchResult {
-    const results = Array.isArray(response.results)
-        ? response.results
-              .map((result) => normalizeImageResult(result as OpenVerseApiResult))
-              .filter((result): result is OpenVerseImageResult => result !== null)
-        : [];
+    if (!isRecord(response)) {
+        throw new OpenVerseSearchError('invalid-response', 'OpenVerse search response is not an object.');
+    }
+
+    const typedResponse = response as OpenVerseApiResponse;
+
+    if (!Array.isArray(typedResponse.results)) {
+        throw new OpenVerseSearchError('invalid-response', 'OpenVerse search response is missing results.');
+    }
+
+    const results = typedResponse.results
+        .map((result) => normalizeImageResult(result))
+        .filter((result): result is OpenVerseImageResult => result !== null);
+
+    if (typedResponse.results.length > 0 && results.length === 0) {
+        throw new OpenVerseSearchError('invalid-response', 'OpenVerse search response contained no usable results.');
+    }
 
     return {
         results,
-        page: numberOrFallback(response.page, fallbackPage),
-        pageCount: numberOrFallback(response.page_count, 0),
-        pageSize: numberOrFallback(response.page_size, fallbackPageSize),
-        resultCount: numberOrFallback(response.result_count, results.length),
+        page: numberOrFallback(typedResponse.page, fallbackPage),
+        pageCount: numberOrFallback(typedResponse.page_count, 0),
+        pageSize: numberOrFallback(typedResponse.page_size, fallbackPageSize),
+        resultCount: numberOrFallback(typedResponse.result_count, results.length),
     };
 }
 
-function normalizeImageResult(result: OpenVerseApiResult): OpenVerseImageResult | null {
-    if (!isString(result.id) || !isString(result.url) || !isString(result.thumbnail)) {
+function normalizeImageResult(result: unknown): OpenVerseImageResult | null {
+    if (!isRecord(result)) {
+        return null;
+    }
+
+    const typedResult = result as OpenVerseApiResult;
+
+    if (!isString(typedResult.id) || !isString(typedResult.url) || !isString(typedResult.thumbnail)) {
         return null;
     }
 
     const normalized: OpenVerseImageResult = {
-        id: result.id,
-        title: isString(result.title) ? result.title : '',
-        imageUrl: result.url,
-        thumbnailUrl: result.thumbnail,
+        id: typedResult.id,
+        title: isString(typedResult.title) ? typedResult.title : '',
+        imageUrl: typedResult.url,
+        thumbnailUrl: typedResult.thumbnail,
     };
 
-    addNumberField(normalized, 'width', result.width);
-    addNumberField(normalized, 'height', result.height);
-    addStringField(normalized, 'source', result.source);
-    addStringField(normalized, 'foreignLandingUrl', result.foreign_landing_url);
-    addStringField(normalized, 'license', result.license);
-    addStringField(normalized, 'licenseUrl', result.license_url);
-    addStringField(normalized, 'creator', result.creator);
-    if (typeof result.mature === 'boolean') {
-        normalized.mature = result.mature;
+    addNumberField(normalized, 'width', typedResult.width);
+    addNumberField(normalized, 'height', typedResult.height);
+    addStringField(normalized, 'source', typedResult.source);
+    addStringField(normalized, 'foreignLandingUrl', typedResult.foreign_landing_url);
+    addStringField(normalized, 'license', typedResult.license);
+    addStringField(normalized, 'licenseUrl', typedResult.license_url);
+    addStringField(normalized, 'creator', typedResult.creator);
+    if (typeof typedResult.mature === 'boolean') {
+        normalized.mature = typedResult.mature;
     }
 
     return normalized;
@@ -170,4 +216,8 @@ function numberOrFallback(value: unknown, fallback: number): number {
 
 function isString(value: unknown): value is string {
     return typeof value === 'string';
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+    return typeof value === 'object' && value !== null;
 }
