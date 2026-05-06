@@ -9,19 +9,19 @@ Requirements for the initial OpenVerse image-search import feature. Each maps to
 
 ### OpenVerse API Client
 
-- [ ] **OVAPI-01**: The app can search OpenVerse images from the browser using a student-entered query.
-- [ ] **OVAPI-02**: The OpenVerse search request uses image-only results and applies `mature=false` by default.
-- [ ] **OVAPI-03**: The app normalizes OpenVerse responses into a local TypeScript result model that includes image URL, thumbnail URL, ID, title, dimensions, and provenance fields for future use.
-- [ ] **OVAPI-04**: The OpenVerse client exposes typed recoverable errors for network failure, invalid responses, empty results, and rate limiting.
-- [ ] **OVAPI-05**: The app does not expose OpenVerse client secrets or authenticated credentials in browser code.
+- [x] **OVAPI-01**: The app can search OpenVerse images from the browser using a student-entered query.
+- [x] **OVAPI-02**: The OpenVerse search request uses image-only results and applies `mature=false` by default.
+- [x] **OVAPI-03**: The app normalizes OpenVerse responses into a local TypeScript result model that includes image URL, thumbnail URL, ID, title, dimensions, and provenance fields for future use.
+- [x] **OVAPI-04**: The OpenVerse client exposes typed recoverable errors for network failure, invalid responses, and rate limiting; valid empty results are represented as a successful empty search response for the Phase 2 empty-result UI state.
+- [x] **OVAPI-05**: The app does not expose OpenVerse client secrets or authenticated credentials in browser code.
 
 ### Remote Image Import
 
-- [ ] **IMPORT-01**: The app can load a selected OpenVerse image and convert it into the same canvas/sample representation used by existing image training samples.
-- [ ] **IMPORT-02**: The app verifies that a remote image is readable as canvas data before adding it to class state.
-- [ ] **IMPORT-03**: Failed remote image loads, CORS/canvas-taint failures, decode failures, and timeouts leave class sample state unchanged.
-- [ ] **IMPORT-04**: Imported OpenVerse images are bounded or resized so oversized remote images do not exhaust classroom browser memory.
-- [ ] **IMPORT-05**: While an image import is pending, duplicate clicks on the same result cannot add duplicate partial samples.
+- [x] **IMPORT-01**: The app can load a selected OpenVerse image and convert it into the same canvas/sample representation used by existing image training samples.
+- [x] **IMPORT-02**: The app verifies that a remote image is readable as canvas data before adding it to class state.
+- [x] **IMPORT-03**: Failed remote image loads, CORS/canvas-taint failures, decode failures, and timeouts leave class sample state unchanged.
+- [x] **IMPORT-04**: Imported OpenVerse images are bounded or resized so oversized remote images do not exhaust classroom browser memory.
+- [x] **IMPORT-05**: While an image import is pending, duplicate clicks on the same result cannot add duplicate partial samples.
 
 ### Student Search UI
 
@@ -44,8 +44,8 @@ Requirements for the initial OpenVerse image-search import feature. Each maps to
 
 ### Validation and Tests
 
-- [ ] **TEST-01**: Unit tests cover OpenVerse client request construction, response normalization, empty results, invalid responses, and rate-limit errors.
-- [ ] **TEST-02**: Unit tests cover remote image import success and failure without mutating class state on failure.
+- [x] **TEST-01**: Unit tests cover OpenVerse client request construction, response normalization, empty results, invalid responses, and rate-limit errors.
+- [x] **TEST-02**: Unit tests cover remote image import success and failure without mutating class state on failure.
 - [ ] **TEST-03**: Component tests cover the search dialog/grid loading, empty, error, result, hover/focus action, and pagination states.
 - [ ] **TEST-04**: Integration tests cover adding a selected OpenVerse result to the intended class while leaving other classes unchanged.
 - [ ] **TEST-05**: Browser/manual validation checks real OpenVerse searches, real image imports, CORS/canvas behavior, save/load, and training with imported samples.
@@ -93,16 +93,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OVAPI-01 | Phase 1 | Pending |
-| OVAPI-02 | Phase 1 | Pending |
-| OVAPI-03 | Phase 1 | Pending |
-| OVAPI-04 | Phase 1 | Pending |
-| OVAPI-05 | Phase 1 | Pending |
-| IMPORT-01 | Phase 1 | Pending |
-| IMPORT-02 | Phase 1 | Pending |
-| IMPORT-03 | Phase 1 | Pending |
-| IMPORT-04 | Phase 1 | Pending |
-| IMPORT-05 | Phase 1 | Pending |
+| OVAPI-01 | Phase 1 | Complete |
+| OVAPI-02 | Phase 1 | Complete |
+| OVAPI-03 | Phase 1 | Complete |
+| OVAPI-04 | Phase 1 | Complete |
+| OVAPI-05 | Phase 1 | Complete |
+| IMPORT-01 | Phase 1 | Complete |
+| IMPORT-02 | Phase 1 | Complete |
+| IMPORT-03 | Phase 1 | Complete |
+| IMPORT-04 | Phase 1 | Complete |
+| IMPORT-05 | Phase 1 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 2 | Pending |
 | UI-03 | Phase 2 | Pending |
@@ -116,8 +116,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRAIN-03 | Phase 3 | Pending |
 | TRAIN-04 | Phase 3 | Pending |
 | TRAIN-05 | Phase 3 | Pending |
-| TEST-01 | Phase 1 | Pending |
-| TEST-02 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
+| TEST-02 | Phase 1 | Complete |
 | TEST-03 | Phase 2 | Pending |
 | TEST-04 | Phase 3 | Pending |
 | TEST-05 | Phase 4 | Pending |
@@ -129,4 +129,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-06 after initial definition*
+*Last updated: 2026-05-06 after Phase 1 verification*

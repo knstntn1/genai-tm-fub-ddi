@@ -12,7 +12,7 @@ This roadmap adds OpenVerse image search to the existing brownfield React/Vite t
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: OpenVerse Client & Import Boundary** - The app can search OpenVerse and convert selected remote images into safe, bounded canvas samples.
+- [x] **Phase 1: OpenVerse Client & Import Boundary** - The app can search OpenVerse and convert selected remote images into safe, bounded canvas samples.
 - [ ] **Phase 2: Student Search UI** - Students can search and browse image-only OpenVerse results in a simple class-scoped interface.
 - [ ] **Phase 3: Training Workflow Integration** - OpenVerse imports enter the current image class as normal trainable samples without corrupting class state.
 - [ ] **Phase 4: Live Browser Validation** - Real OpenVerse searches, remote image imports, save/load, and training are validated in browser conditions.
@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
   1. The system can submit a student query to OpenVerse image search with image-only results and `mature=false` without browser-exposed credentials.
   2. The system normalizes successful OpenVerse responses into a local typed result model while preserving fields needed for future provenance use.
-  3. The system reports recoverable typed errors for empty results, invalid responses, network failures, and rate limiting.
+  3. The system reports recoverable typed errors for invalid responses, network failures, and rate limiting, while valid empty results produce a successful empty search response.
   4. The system converts a selected remote image into the same readable canvas/sample representation used by existing image training samples, with size bounds applied.
   5. Failed loads, CORS/canvas-taint failures, decode failures, timeouts, and duplicate pending imports do not create partial samples or mutate class sample state.
 **Plans**:
@@ -78,7 +78,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. OpenVerse Client & Import Boundary | 2/2 | Ready to execute | - |
-| 2. Student Search UI | 0/TBD | Not started | - |
+| 1. OpenVerse Client & Import Boundary | 2/2 | Complete | 2026-05-06 |
+| 2. Student Search UI | 0/TBD | Ready to plan | - |
 | 3. Training Workflow Integration | 0/TBD | Not started | - |
 | 4. Live Browser Validation | 0/TBD | Not started | - |
