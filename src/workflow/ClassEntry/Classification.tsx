@@ -23,6 +23,8 @@ import AudioExampleRecorder from '@genaitm/components/AudioExampleRecorder/Audio
 import { AudioExample } from '@genai-fi/classifier';
 import { validateAudioBlob } from '@genaitm/util/audio';
 import OpenVerseSearchDialog from '../OpenVerseSearch/OpenVerseSearchDialog';
+import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
+import type { OpenVerseImageResult } from '@genaitm/util/openverse';
 
 const SAMPLEMIN_DEFAULT = 2;
 const SAMPLEMIN_AUDIO_NOISE = 20;
@@ -279,6 +281,28 @@ export function Classification({
 
     const doOpenVerseClose = useCallback(() => setShowOpenVerseSearch(false), [setShowOpenVerseSearch]);
 
+    const handleUseOpenVerseImage = useCallback(
+        async (result: OpenVerseImageResult) => {
+            const canvas = await importOpenVerseImage({
+                imageUrl: result.imageUrl,
+                fallbackUrl: result.thumbnailUrl,
+            });
+
+            canvas.style.width = '58px';
+            canvas.style.height = '58px';
+
+            setData(
+                (data) => ({
+                    ...data,
+                    samples: [{ data: canvas, id: '' }, ...data.samples],
+                }),
+                index
+            );
+            setShowOpenVerseSearch(false);
+        },
+        [index, setData]
+    );
+
     const handleSampleClick = useCallback(
         (ix: number) => {
             if (onSampleClick) {
@@ -493,7 +517,7 @@ export function Classification({
                 open={showOpenVerseSearch}
                 className={name}
                 onClose={doOpenVerseClose}
-                onUseImage={() => {}}
+                onUseImage={handleUseOpenVerseImage}
             />
         </Widget>
     );

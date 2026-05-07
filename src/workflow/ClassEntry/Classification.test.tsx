@@ -1,10 +1,28 @@
-import { describe, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { Classification } from './Classification';
 import TestWrapper from '../../util/TestWrapper';
 import { VariantContext, type IVariantContext } from '../../util/variant';
+import { searchOpenVerseImages, type OpenVerseImageResult } from '@genaitm/util/openverse';
+import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
+
+vi.mock('@genaitm/util/openverse', () => ({
+    OpenVerseSearchError: class OpenVerseSearchError extends Error {
+        readonly code: string;
+
+        constructor(code: string, message: string) {
+            super(message);
+            this.code = code;
+        }
+    },
+    searchOpenVerseImages: vi.fn(),
+}));
+
+vi.mock('@genaitm/util/openverseImageImport', () => ({
+    importOpenVerseImage: vi.fn(),
+}));
 
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
@@ -24,7 +42,11 @@ vi.mock('react-i18next', () => ({
                 'trainingdata.openverse.searchLabel': 'Suchbegriff',
                 'trainingdata.openverse.searchPlaceholder': 'z. B. Katze',
                 'trainingdata.openverse.searchAction': 'Bilder suchen',
+                'trainingdata.openverse.useImage': 'Dieses Bild nutzen',
                 'trainingdata.openverse.initial': 'Suche nach Bildern für diese Klasse.',
+                'trainingdata.openverse.loading': 'Suche Bilder...',
+                'trainingdata.openverse.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
+                'trainingdata.openverse.fallbackAlt': 'OpenVerse Bild',
             };
             return translations[key] ?? key;
         },
@@ -44,7 +66,25 @@ const speechVariant: IVariantContext = {
     sampleUploadFile: true,
 };
 
+const catResult: OpenVerseImageResult = {
+    id: 'cat-1',
+    title: 'Katze',
+    imageUrl: 'https://example.com/cat-full.jpg',
+    thumbnailUrl: 'https://example.com/cat-thumb.jpg',
+};
+
+function createCanvas(testId = 'imported-canvas') {
+    const canvas = document.createElement('canvas');
+    canvas.setAttribute('data-testid', testId);
+    return canvas;
+}
+
 describe('Classification component', () => {
+    beforeEach(() => {
+        vi.mocked(searchOpenVerseImages).mockReset();
+        vi.mocked(importOpenVerseImage).mockReset();
+    });
+
     it('renders with no samples and inactive', async ({ expect }) => {
         render(
             <Classification
@@ -125,5 +165,61 @@ describe('Classification component', () => {
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
         expect(screen.queryByTestId('openversebutton')).not.toBeInTheDocument();
         expect(screen.queryByText('Bildsuche')).not.toBeInTheDocument();
+    });
+
+    it('imports a selected OpenVerse result before prepending a normal sample', async ({ expect }) => {
+        const user = userEvent.setup();
+        const setData = vi.fn();
+        const importedCanvas = createCanvas();
+        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+            results: [catResult],
+            page: 1,
+            pageCount: 1,
+            pageSize: 20,
+            resultCount: 1,
+        });
+        vi.mocked(importOpenVerseImage).mockResolvedValue(importedCanvas);
+
+        render(
+            <Classification
+                name="Katze"
+                index={1}
+                active={false}
+                data={{ label: 'Katze', samples: [] }}
+                setData={setData}
+                setActive={() => {}}
+                onActivate={() => {}}
+                onDelete={() => {}}
+            />,
+            { wrapper: TestWrapper }
+        );
+
+        await user.click(screen.getByTestId('openversebutton'));
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
+
+        await waitFor(() => expect(importOpenVerseImage).toHaveBeenCalledTimes(1));
+        expect(importOpenVerseImage).toHaveBeenCalledWith({
+            imageUrl: catResult.imageUrl,
+            fallbackUrl: catResult.thumbnailUrl,
+        });
+        expect(setData).toHaveBeenCalledTimes(1);
+        expect(setData).toHaveBeenCalledWith(expect.any(Function), 1);
+
+        const updater = setData.mock.calls[0][0] as (old: { label: string; samples: []; disabled?: boolean }) => {
+            label: string;
+            samples: { data: HTMLCanvasElement; id: string }[];
+            disabled?: boolean;
+        };
+        const updated = updater({ label: 'Katze', samples: [], disabled: true });
+
+        expect(updated).toEqual({
+            label: 'Katze',
+            samples: [{ data: importedCanvas, id: '' }],
+            disabled: true,
+        });
+        expect(importedCanvas.style.width).toBe('58px');
+        expect(importedCanvas.style.height).toBe('58px');
     });
 });
