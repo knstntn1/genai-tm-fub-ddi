@@ -385,17 +385,17 @@ This prevents stale invalid indexes from throwing or creating sparse arrays. [VE
 
 All claims in this research were verified from repository files, phase artifacts, test runs, npm registry/version commands, or AGENTS.md. No `[ASSUMED]` claims are intentionally relied on. [VERIFIED: terminal command] [CITED: AGENTS.md]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should success close the dialog?**
+1. **RESOLVED: Should success close the dialog?**
    - What we know: Failure must keep the dialog open, and the requirement says the sample appears immediately in the existing list/count. [VERIFIED: .planning/phases/03-training-workflow-integration/03-CONTEXT.md] [VERIFIED: .planning/REQUIREMENTS.md]
    - What's unclear: The context does not explicitly say whether a successful import should leave the dialog open for repeated single-image imports. [VERIFIED: .planning/phases/03-training-workflow-integration/03-CONTEXT.md]
-   - Recommendation: Close on success after state mutation so the student sees the updated class card immediately; keep failure open via the dialog's rejected-callback path. [VERIFIED: src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:157] [VERIFIED: src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:173]
+   - Decision: Close on success after state mutation so the student sees the updated class card immediately; keep failure open via the dialog's rejected-callback path. [VERIFIED: src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:157] [VERIFIED: src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx:173]
 
-2. **Should stale detection reject class renames during import?**
+2. **RESOLVED: Should stale detection reject class renames during import?**
    - What we know: Phase context says discard stale imports if class state changed or the target class is no longer valid. [VERIFIED: .planning/phases/03-training-workflow-integration/03-CONTEXT.md]
    - What's unclear: A class rename may represent the same visual card, but it changes the class identity visible to the student. [VERIFIED: src/workflow/ClassEntry/Classification.tsx:193]
-   - Recommendation: Treat a changed label at the captured index as stale for v1, because it is safer than adding a slow result into a class with changed visible identity. [VERIFIED: .planning/REQUIREMENTS.md]
+   - Decision: Treat a changed label at the captured index as stale for v1, because it is safer than adding a slow result into a class with changed visible identity. [VERIFIED: .planning/REQUIREMENTS.md]
 
 ## Environment Availability
 
