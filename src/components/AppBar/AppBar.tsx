@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useVariant } from '../../util/variant';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
+import GridViewIcon from '@mui/icons-material/GridView';
 import style from './AppBar.module.css';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { feedbackAtom, loadState, menuShowSettings, saveState, showOpenDialog } from '../../state';
+import { feedbackAtom, loadState, menuShowSettings, saveState, showDataExplorer, showOpenDialog } from '../../state';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { IconButton, Link as MUILink } from '@mui/material';
 import Suggestion from '../Suggestion/Suggestion';
@@ -43,6 +44,7 @@ export default function ApplicationBar({ showReminder, onSave }: Props) {
     const saveButtonRef = useRef(null);
     const [reminder, setReminder] = useState(true);
     const setShowOpenDialog = useSetAtom(showOpenDialog);
+    const setShowDataExplorer = useSetAtom(showDataExplorer);
     const isloading = useAtomValue(loadState);
     const setShowSettings = useSetAtom(menuShowSettings);
     const showFeedback = useAtomValue(feedbackAtom);
@@ -55,6 +57,10 @@ export default function ApplicationBar({ showReminder, onSave }: Props) {
         //navigate(`/settings?${createSearchParams(params)}`, { replace: false });
         setShowSettings(true);
     }, [setShowSettings]);
+
+    const openDataExplorer = useCallback(() => {
+        setShowDataExplorer(true);
+    }, [setShowDataExplorer]);
 
     const doSave = useCallback(() => {
         setReminder(false);
@@ -103,6 +109,16 @@ export default function ApplicationBar({ showReminder, onSave }: Props) {
                         ref={saveButtonRef}
                     >
                         {t('app.save')}
+                    </BusyButton>
+                    <BusyButton
+                        busy={false}
+                        data-testid="data-explorer"
+                        color="inherit"
+                        variant="outlined"
+                        startIcon={<GridViewIcon />}
+                        onClick={openDataExplorer}
+                    >
+                        DataExplorer
                     </BusyButton>
                 </div>
                 <div className={showSettings ? style.langBarWithSettings : style.langBar}>

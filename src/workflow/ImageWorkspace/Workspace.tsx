@@ -5,7 +5,15 @@ import Preview from '../Preview/Preview';
 import Output from '../Output/Output';
 import Behaviours from '../../workflow/Behaviours/Behaviours';
 import { useTranslation } from 'react-i18next';
-import { classState, IClassification, saveState, inputImage, prediction, predictedIndex } from '../../state';
+import {
+    classState,
+    IClassification,
+    saveState,
+    inputImage,
+    prediction,
+    predictedIndex,
+    showDataExplorer,
+} from '../../state';
 import style from './TeachableMachine.module.css';
 import { useVariant } from '../../util/variant';
 import Input from '../Input/Input';
@@ -22,6 +30,7 @@ import OpenDialog from './OpenDialog';
 import CloneDialog from './CloneDialog';
 import { IConnection, WorkflowLayout, SidePanel } from '@genai-fi/base';
 import UnderTheHood from '../../views/UnderTheHood/UnderTheHood';
+import DataExplorerDialog from '@genaitm/components/DataExplorer/DataExplorerDialog';
 
 const SAVE_PERIOD = 5 * 60 * 1000; // 5 mins
 
@@ -69,6 +78,7 @@ export default function Workspace({ step, visitedStep, onComplete, saveTrigger, 
     const [showShare, setShowShare] = useState(false);
     const [showClone, setShowClone] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
+    const [dataExplorerOpen, setDataExplorerOpen] = useAtom(showDataExplorer);
     const lastVariantRef = useRef(modelVariant);
 
     // Ensure an initial model exists
@@ -106,6 +116,7 @@ export default function Workspace({ step, visitedStep, onComplete, saveTrigger, 
     const doSidebar = useCallback(() => {
         setShowSidebar(true);
     }, []);
+    const doDataExplorerClose = useCallback(() => setDataExplorerOpen(false), [setDataExplorerOpen]);
 
     const saveTimer = useRef(-1);
 
@@ -242,6 +253,10 @@ export default function Workspace({ step, visitedStep, onComplete, saveTrigger, 
                 onSave={doSave}
             />
             <OpenDialog />
+            <DataExplorerDialog
+                open={dataExplorerOpen}
+                onClose={doDataExplorerClose}
+            />
             <ExportDialog
                 open={showShare}
                 onClose={doCloseShare}

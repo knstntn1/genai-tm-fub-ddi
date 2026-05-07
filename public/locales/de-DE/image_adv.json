@@ -466,5 +466,30 @@
             "name": "Züge",
             "description": "Sammlung von Zugbildern"
         }
+    },
+    "dataExplorer": {
+        "fields": {
+            "datasetName": "Datensatzname"
+        },
+        "actions": {
+            "createDataset": "Datensatz erstellen",
+            "deleteDataset": "Datensatz löschen",
+            "deleteImage": "Bild löschen"
+        },
+        "split": {
+            "training": "Training",
+            "test": "Test"
+        },
+        "empty": {
+            "noDatasets": "Erstelle einen Datensatz, um Bilder hinzuzufügen.",
+            "noImages": "Füge Bilder per Upload, Webcam oder Bildsuche hinzu."
+        },
+        "labels": {
+            "image": "Datensatzbild"
+        },
+        "errors": {
+            "addFailed": "Das Bild konnte nicht hinzugefügt werden."
+        },
+        "defaultDatasetName": "Datensatz"
     }
 }

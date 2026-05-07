@@ -23,6 +23,7 @@ describe('AppBar component', () => {
         render(<ApplicationBar onSave={saveFn} />, { wrapper: TestWrapper });
         expect(screen.getByTestId('open-project')).toBeInTheDocument();
         expect(screen.getByTestId('save-project')).toBeInTheDocument();
+        expect(screen.getByTestId('data-explorer')).toHaveTextContent('DataExplorer');
         expect(screen.getByText('English')).toBeInTheDocument();
     });
 

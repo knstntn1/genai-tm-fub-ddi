@@ -467,5 +467,30 @@
             "name": "Treni",
             "description": "Raccolta di immagini di treni"
         }
+    },
+    "dataExplorer": {
+        "fields": {
+            "datasetName": "Dataset name"
+        },
+        "actions": {
+            "createDataset": "Create dataset",
+            "deleteDataset": "Delete dataset",
+            "deleteImage": "Delete image"
+        },
+        "split": {
+            "training": "Training",
+            "test": "Test"
+        },
+        "empty": {
+            "noDatasets": "Create a dataset to add images.",
+            "noImages": "Add images by upload, webcam, or image search."
+        },
+        "labels": {
+            "image": "Dataset image"
+        },
+        "errors": {
+            "addFailed": "The image could not be added."
+        },
+        "defaultDatasetName": "Dataset"
     }
 }
