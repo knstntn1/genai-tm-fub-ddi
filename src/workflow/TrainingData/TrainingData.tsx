@@ -49,6 +49,9 @@ export function TrainingData({ active, data, setData, disabled, onFocused }: Pro
     const setDataIx = useCallback(
         (samples: (old: IClassification) => IClassification, ix: number) => {
             setData((data) => {
+                if (ix < 0 || ix >= data.length) {
+                    return data;
+                }
                 const newdata = [...data];
                 newdata[ix] = samples(data[ix]);
                 return newdata;

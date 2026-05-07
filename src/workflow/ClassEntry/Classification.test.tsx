@@ -73,10 +73,27 @@ const catResult: OpenVerseImageResult = {
     thumbnailUrl: 'https://example.com/cat-thumb.jpg',
 };
 
+const dogResult: OpenVerseImageResult = {
+    id: 'dog-1',
+    title: 'Hund',
+    imageUrl: 'https://example.com/dog-full.jpg',
+    thumbnailUrl: 'https://example.com/dog-thumb.jpg',
+};
+
 function createCanvas(testId = 'imported-canvas') {
     const canvas = document.createElement('canvas');
     canvas.setAttribute('data-testid', testId);
     return canvas;
+}
+
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
 }
 
 describe('Classification component', () => {
@@ -203,6 +220,7 @@ describe('Classification component', () => {
         expect(importOpenVerseImage).toHaveBeenCalledWith({
             imageUrl: catResult.imageUrl,
             fallbackUrl: catResult.thumbnailUrl,
+            signal: expect.any(AbortSignal),
         });
         expect(setData).toHaveBeenCalledTimes(1);
         expect(setData).toHaveBeenCalledWith(expect.any(Function), 1);
@@ -221,5 +239,137 @@ describe('Classification component', () => {
         });
         expect(importedCanvas.style.width).toBe('58px');
         expect(importedCanvas.style.height).toBe('58px');
+    });
+
+    it('keeps the dialog recoverable and leaves samples unchanged when import fails', async ({ expect }) => {
+        const user = userEvent.setup();
+        const setData = vi.fn();
+        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+            results: [catResult],
+            page: 1,
+            pageCount: 1,
+            pageSize: 20,
+            resultCount: 1,
+        });
+        vi.mocked(importOpenVerseImage).mockRejectedValue(new Error('import failed'));
+
+        render(
+            <Classification
+                name="Katze"
+                index={0}
+                active={false}
+                data={{ label: 'Katze', samples: [] }}
+                setData={setData}
+                setActive={() => {}}
+                onActivate={() => {}}
+                onDelete={() => {}}
+            />,
+            { wrapper: TestWrapper }
+        );
+
+        await user.click(screen.getByTestId('openversebutton'));
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
+
+        expect(await screen.findByText('Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.')).toBeInTheDocument();
+        expect(screen.getByLabelText('Suchbegriff')).toHaveValue('katze');
+        expect(setData).not.toHaveBeenCalled();
+    });
+
+    it('discards a late import when the class label changes before it resolves', async ({ expect }) => {
+        const user = userEvent.setup();
+        const setData = vi.fn();
+        const pendingImport = deferred<HTMLCanvasElement>();
+        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+            results: [catResult],
+            page: 1,
+            pageCount: 1,
+            pageSize: 20,
+            resultCount: 1,
+        });
+        vi.mocked(importOpenVerseImage).mockReturnValue(pendingImport.promise);
+
+        const { rerender } = render(
+            <Classification
+                name="Katze"
+                index={0}
+                active={false}
+                data={{ label: 'Katze', samples: [] }}
+                setData={setData}
+                setActive={() => {}}
+                onActivate={() => {}}
+                onDelete={() => {}}
+            />,
+            { wrapper: TestWrapper }
+        );
+
+        await user.click(screen.getByTestId('openversebutton'));
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
+
+        rerender(
+            <Classification
+                name="Hund"
+                index={0}
+                active={false}
+                data={{ label: 'Hund', samples: [] }}
+                setData={setData}
+                setActive={() => {}}
+                onActivate={() => {}}
+                onDelete={() => {}}
+            />
+        );
+        pendingImport.resolve(createCanvas());
+
+        expect(await screen.findByText('Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.')).toBeInTheDocument();
+        expect(setData).not.toHaveBeenCalled();
+    });
+
+    it('discards an older import when a newer result supersedes it', async ({ expect }) => {
+        const user = userEvent.setup();
+        const setData = vi.fn();
+        const firstImport = deferred<HTMLCanvasElement>();
+        const secondCanvas = createCanvas('second-canvas');
+        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+            results: [catResult, dogResult],
+            page: 1,
+            pageCount: 1,
+            pageSize: 20,
+            resultCount: 2,
+        });
+        vi.mocked(importOpenVerseImage)
+            .mockReturnValueOnce(firstImport.promise)
+            .mockResolvedValueOnce(secondCanvas);
+
+        render(
+            <Classification
+                name="Katze"
+                index={0}
+                active={false}
+                data={{ label: 'Katze', samples: [] }}
+                setData={setData}
+                setActive={() => {}}
+                onActivate={() => {}}
+                onDelete={() => {}}
+            />,
+            { wrapper: TestWrapper }
+        );
+
+        await user.click(screen.getByTestId('openversebutton'));
+        await user.type(screen.getByLabelText('Suchbegriff'), 'tier');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
+        await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Hund' }));
+
+        await waitFor(() => expect(setData).toHaveBeenCalledTimes(1));
+        firstImport.resolve(createCanvas('first-canvas'));
+
+        await waitFor(() => expect(setData).toHaveBeenCalledTimes(1));
+        const updater = setData.mock.calls[0][0] as (old: { label: string; samples: [] }) => {
+            samples: { data: HTMLCanvasElement; id: string }[];
+        };
+        expect(updater({ label: 'Katze', samples: [] }).samples).toEqual([{ data: secondCanvas, id: '' }]);
     });
 });

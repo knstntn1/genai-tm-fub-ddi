@@ -56,6 +56,8 @@ export function Classification({
     const { t } = useTranslation(namespace);
     const fileRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLOListElement>(null);
+    const classLabelRef = useRef(data.label);
+    const openVerseImportRef = useRef<{ id: number; controller: AbortController | null }>({ id: 0, controller: null });
     const [loading, setLoading] = useState(false);
     const [showTip, setShowTip] = useState(false);
     const [showDropError, setShowDropError] = useState(false);
@@ -71,6 +73,16 @@ export function Classification({
     useEffect(() => {
         if (!active) setAudioBlob(null);
     }, [active]);
+
+    useEffect(() => {
+        classLabelRef.current = data.label;
+    }, [data.label]);
+
+    useEffect(() => {
+        return () => {
+            openVerseImportRef.current.controller?.abort();
+        };
+    }, []);
 
     const doShowTip = useCallback(() => data.samples.length === 0 && setShowTip(true), [data, setShowTip]);
 
@@ -283,10 +295,25 @@ export function Classification({
 
     const handleUseOpenVerseImage = useCallback(
         async (result: OpenVerseImageResult) => {
+            const targetLabel = data.label;
+            openVerseImportRef.current.controller?.abort();
+            const controller = new AbortController();
+            const importId = openVerseImportRef.current.id + 1;
+            openVerseImportRef.current = { id: importId, controller };
+
             const canvas = await importOpenVerseImage({
                 imageUrl: result.imageUrl,
                 fallbackUrl: result.thumbnailUrl,
+                signal: controller.signal,
             });
+
+            if (
+                controller.signal.aborted ||
+                openVerseImportRef.current.id !== importId ||
+                classLabelRef.current !== targetLabel
+            ) {
+                throw new Error('stale-openverse-import-target');
+            }
 
             canvas.style.width = '58px';
             canvas.style.height = '58px';
@@ -298,9 +325,10 @@ export function Classification({
                 }),
                 index
             );
+            openVerseImportRef.current.controller = null;
             setShowOpenVerseSearch(false);
         },
-        [index, setData]
+        [data.label, index, setData]
     );
 
     const handleSampleClick = useCallback(
