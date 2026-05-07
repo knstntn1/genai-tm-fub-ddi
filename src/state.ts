@@ -14,6 +14,23 @@ export interface IClassification {
     disabled?: boolean;
 }
 
+export type DatasetSplit = 'training' | 'test';
+
+export type ProjectDatasetImageSource = 'upload' | 'webcam' | 'openverse';
+
+export interface ProjectDatasetImage {
+    id: string;
+    split: DatasetSplit;
+    data: HTMLCanvasElement;
+    source?: ProjectDatasetImageSource;
+}
+
+export interface ProjectDataset {
+    id: string;
+    name: string;
+    images: ProjectDatasetImage[];
+}
+
 export const fileData = atom<File | null>(null);
 
 export interface IPrediction {
@@ -34,6 +51,8 @@ export const predictedIndex = atom<number>(-1);
 export const behaviourState = atom<BehaviourType[]>([]);
 
 export const classState = atom<IClassification[]>([]);
+
+export const datasetState = atom<ProjectDataset[]>([]);
 
 export const modelState = atom<TeachableModel | undefined>(undefined);
 
@@ -64,6 +83,8 @@ export const inputImage = atom<HTMLCanvasElement | null>(null);
 export const xaiEnabled = atom<boolean>(true);
 
 export const showOpenDialog = atom<boolean>(false);
+
+export const showDataExplorer = atom<boolean>(false);
 
 export const enableCamInput = atom<boolean>(true);
 

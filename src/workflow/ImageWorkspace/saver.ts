@@ -1,10 +1,12 @@
 import { saveAs } from 'file-saver';
 import { BehaviourType } from '../../workflow/Behaviours/Behaviours';
-import { IClassification, saveState, behaviourState, classState, sessionCode } from '../../state';
+import { IClassification, saveState, behaviourState, classState, sessionCode, datasetState, ProjectDataset } from '../../state';
 import { useTeachableModel } from '../../util/TeachableModel';
 import { useAtomValue, useAtom } from 'jotai';
 import { useEffect } from 'react';
 import ClassifierApp, { TeachableModel } from '@genai-fi/classifier';
+import JSZip from 'jszip';
+import { addProjectDatasetsToZip } from '@genaitm/util/projectDatasets';
 
 export interface ModelContents {
     behaviours?: string;
@@ -19,7 +21,8 @@ export async function saveProject(
     code: string,
     model?: TeachableModel,
     behaviours?: BehaviourType[],
-    samples?: IClassification[]
+    samples?: IClassification[],
+    datasets: ProjectDataset[] = []
 ) {
     if (model) {
         const app = new ClassifierApp(
@@ -30,7 +33,11 @@ export async function saveProject(
         );
         app.projectId = code;
         const zipData = await app.save();
-        if (zipData) saveAs(zipData, name);
+        if (zipData) {
+            const zip = await JSZip.loadAsync(zipData);
+            await addProjectDatasetsToZip(zip, datasets);
+            saveAs(await zip.generateAsync({ type: 'blob' }), name);
+        }
     }
 }
 
@@ -43,6 +50,7 @@ export function ModelSaver({ onSaved }: Props) {
     const behaviours = useAtomValue(behaviourState);
     const code = useAtomValue(sessionCode);
     const data = useAtomValue(classState);
+    const datasets = useAtomValue(datasetState);
     const [saving, setSaving] = useAtom(saveState);
 
     useEffect(() => {
@@ -53,13 +61,14 @@ export function ModelSaver({ onSaved }: Props) {
                 code,
                 model,
                 saving.behaviours ? behaviours : undefined,
-                saving.samples ? data : undefined
+                saving.samples ? data : undefined,
+                datasets
             ).then(() => {
                 setSaving(null);
                 if (onSaved) onSaved();
             });
         }
-    }, [saving, code, data, behaviours, model, onSaved, setSaving]);
+    }, [saving, code, data, datasets, behaviours, model, onSaved, setSaving]);
 
     return null;
 }

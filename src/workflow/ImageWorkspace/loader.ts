@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { BehaviourType } from '../Behaviour/Behaviour';
-import { behaviourState, classState, fileData, loadState, modelState, sessionCode } from '../../state';
+import { behaviourState, classState, datasetState, fileData, loadState, modelState, sessionCode, ProjectDataset } from '../../state';
 import { useAtom, useSetAtom } from 'jotai';
 import { useSearchParams } from 'react-router-dom';
 import ClassifierApp, { TeachableModel } from '@genai-fi/classifier';
 import { ISample } from '@genai-fi/classifier/main/ClassifierApp';
+import { loadProjectDatasetsFromZip } from '@genaitm/util/projectDatasets';
 
 interface Project {
     id?: string;
@@ -12,10 +13,11 @@ interface Project {
     behaviours?: BehaviourType[];
     samples?: ISample[][];
     labels?: string[];
+    datasets?: ProjectDataset[];
 }
 
 export async function loadProject(file: File | Blob): Promise<Project> {
-    const app = await ClassifierApp.load(file);
+    const [app, datasets] = await Promise.all([ClassifierApp.load(file), loadProjectDatasetsFromZip(file)]);
 
     return {
         id: app.projectId,
@@ -23,6 +25,7 @@ export async function loadProject(file: File | Blob): Promise<Project> {
         behaviours: app.behaviours,
         samples: app.samples,
         labels: app.getLabels(),
+        datasets,
     };
 }
 
@@ -46,6 +49,7 @@ export function ModelLoader({ onLoaded, onError }: Props) {
     const setBehaviours = useSetAtom(behaviourState);
     const setCode = useSetAtom(sessionCode);
     const setData = useSetAtom(classState);
+    const setDatasets = useSetAtom(datasetState);
     const setLoading = useSetAtom(loadState);
     const setModel = useSetAtom(modelState);
 
@@ -78,6 +82,7 @@ export function ModelLoader({ onLoaded, onError }: Props) {
                         if (project.behaviours) {
                             setBehaviours(project.behaviours);
                         }
+                        setDatasets(project.datasets ?? []);
 
                         setLoading(false);
                         if (onLoaded) {
@@ -90,7 +95,7 @@ export function ModelLoader({ onLoaded, onError }: Props) {
                     });
             }
         }
-    }, [params, onLoaded, setData, setBehaviours, onError, setLoading]);
+    }, [params, onLoaded, setData, setDatasets, setBehaviours, onError, setLoading]);
 
     useEffect(() => {
         if (projectFile) {
@@ -111,6 +116,7 @@ export function ModelLoader({ onLoaded, onError }: Props) {
                     if (project.behaviours) {
                         setBehaviours(project.behaviours);
                     }
+                    setDatasets(project.datasets ?? []);
 
                     setLoading(false);
                     if (onLoaded) {
@@ -128,7 +134,7 @@ export function ModelLoader({ onLoaded, onError }: Props) {
                     setLoading(false);
                 });
         }
-    }, [projectFile, setProjectFile, onLoaded, setData, setCode, setBehaviours, onError, setLoading]);
+    }, [projectFile, setProjectFile, onLoaded, setData, setDatasets, setCode, setBehaviours, onError, setLoading]);
 
     return null;
 }
