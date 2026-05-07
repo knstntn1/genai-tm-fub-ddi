@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-05-06)
 Phase: 4 of 4 (Live Browser Validation)
 Plan: 04-01
 Status: Complete
-Last activity: 2026-05-07 - Phase 4 live browser validation passed. A live training blocker was found and fixed by normalizing OpenVerse imports to 224x224 training canvases; real search/import, failed-provider recovery, desktop/tablet/mobile behavior, save/load, and training all validated.
+Last activity: 2026-05-07 - Completed quick task 20260507: Dataset management with DataExplorer, project-ZIP persistence, Training/Test tagging, and managed dataset picker integration. Automated verification passed; browser/device validation remains human-needed.
 
 Progress: [██████████] 100%
 
@@ -58,12 +58,19 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- None for v1 OpenVerse image search.
+- Human-validate the DataExplorer browser flow: file picker upload, webcam capture, real OpenVerse import, project ZIP save/reopen, and managed training/test picker UX.
 
 ### Blockers/Concerns
 
+- Dataset management quick task is implemented but still needs browser/device validation before classroom rollout.
 - Anonymous OpenVerse rate limits and classroom-network behavior should still be monitored during classroom pilots.
 - Client-side `mature=false` is best-effort and does not guarantee complete classroom-safe results.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 20260507 | Dataset management with DataExplorer, project ZIP persistence, Training/Test tags, and managed dataset picker integration | 2026-05-07 | b02e810 | Needs Review | [20260507-dataset-management](./quick/20260507-dataset-management/) |
 
 ## Deferred Items
 
