@@ -18,7 +18,7 @@ import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { canvasesFromFiles } from '@genai-fi/base';
 import { Button } from '@genaitm/components/button/Button';
-import { datasetState, DatasetSplit, ProjectDataset } from '@genaitm/state';
+import { datasetState, DatasetSplit } from '@genaitm/state';
 import {
     createProjectDataset,
     createProjectDatasetImage,

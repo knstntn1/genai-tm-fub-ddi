@@ -5,12 +5,12 @@ import { createStore, Provider } from 'jotai';
 import { datasetState } from '@genaitm/state';
 import DataExplorerDialog from './DataExplorerDialog';
 
-HTMLCanvasElement.prototype.getContext = vi.fn(
-    () =>
-        ({
-            drawImage: vi.fn(),
-        }) as unknown as CanvasRenderingContext2D
-);
+const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext') as unknown as {
+    mockReturnValue: (value: CanvasRenderingContext2D) => void;
+};
+getContextSpy.mockReturnValue({
+    drawImage: vi.fn(),
+} as unknown as CanvasRenderingContext2D);
 
 vi.mock('@genaitm/workflow/ClassEntry/WebcamCapture', () => ({
     default: () => null,
