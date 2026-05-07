@@ -50,6 +50,15 @@
             href="/manifest.json"
         />
         <title>GenAI Teachable Machine</title>
+        <script>
+            if (
+                window.location.hostname === 'knstntn1.github.io' &&
+                window.location.pathname.startsWith('/genai-tm-fub-ddi')
+            ) {
+                const path = window.location.pathname.replace(/^\/genai-tm-fub-ddi\/?/, '/');
+                window.location.replace(`https://tm-test.knstntn.dev${path}${window.location.search}${window.location.hash}`);
+            }
+        </script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
