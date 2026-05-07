@@ -13,7 +13,7 @@ This roadmap adds OpenVerse image search to the existing brownfield React/Vite t
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: OpenVerse Client & Import Boundary** - The app can search OpenVerse and convert selected remote images into safe, bounded canvas samples.
-- [ ] **Phase 2: Student Search UI** - Students can search and browse image-only OpenVerse results in a simple class-scoped interface.
+- [x] **Phase 2: Student Search UI** - Students can search and browse image-only OpenVerse results in a simple class-scoped interface.
 - [ ] **Phase 3: Training Workflow Integration** - OpenVerse imports enter the current image class as normal trainable samples without corrupting class state.
 - [ ] **Phase 4: Live Browser Validation** - Real OpenVerse searches, remote image imports, save/load, and training are validated in browser conditions.
 
@@ -43,7 +43,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Student sees results as an image-only grid with no visible license, attribution, creator, source, advanced filter, or metadata chrome in v1.
   4. Student can access the German action `Dieses Bild nutzen` by hover and by equivalent keyboard/touch interactions.
   5. Student can load more results through a simple next-page or `Mehr Ergebnisse` action when more pages are available.
-**Plans**: TBD
+**Plans**:
+- `02-01-PLAN.md` - OpenVerse Search Dialog
+- `02-02-PLAN.md` - OpenVerse Locale Keys
 **UI hint**: yes
 
 ### Phase 3: Training Workflow Integration
@@ -79,6 +81,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. OpenVerse Client & Import Boundary | 2/2 | Complete | 2026-05-06 |
-| 2. Student Search UI | 0/TBD | Ready to plan | - |
-| 3. Training Workflow Integration | 0/TBD | Not started | - |
+| 2. Student Search UI | 2/2 | Complete | 2026-05-07 |
+| 3. Training Workflow Integration | 0/TBD | Ready to plan | - |
 | 4. Live Browser Validation | 0/TBD | Not started | - |

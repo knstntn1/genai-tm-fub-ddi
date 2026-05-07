@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-05-06)
 
 **Core value:** Students can add useful image examples to a class through a trivial OpenVerse search flow without leaving the training-data workflow.
-**Current focus:** Phase 2: Student Search UI
+**Current focus:** Phase 3: Training Workflow Integration
 
 ## Current Position
 
-Phase: 2 of 4 (Student Search UI)
+Phase: 3 of 4 (Training Workflow Integration)
 Plan: TBD
 Status: Ready to plan
-Last activity: 2026-05-06 - Phase 1 executed, reviewed, and verified passed with accepted empty-results contract clarification.
+Last activity: 2026-05-07 - Phase 2 executed, code-reviewed clean, UI-reviewed 23/24, and accepted with browser visual/touch verification deferred to Phase 3/4.
 
-Progress: [███-------] 25%
+Progress: [█████-----] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
+- Total plans completed: 4
 - Average duration: same-day execution
 - Total execution time: 0.0 hours tracked
 
@@ -28,10 +28,11 @@ Progress: [███-------] 25%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 1 | 2 | same-day | same-day |
+| Phase 2 | 2 | same-day | same-day |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 OpenVerse API Client, 01-02 Remote Image Import Boundary
-- Trend: Phase 1 complete; Phase 2 planning next
+- Last 5 plans: 01-01 OpenVerse API Client, 01-02 Remote Image Import Boundary, 02-01 OpenVerse Search Dialog, 02-02 OpenVerse Locale Keys
+- Trend: Phase 2 complete; Phase 3 planning next
 
 *Updated after each plan completion*
 
@@ -47,10 +48,11 @@ Recent decisions affecting current work:
 - [Project]: Integrate only successfully converted OpenVerse images into the existing class sample state.
 - [Project]: Prefer direct browser integration in the static SPA unless validation proves a proxy/cache is required.
 - [Phase 1]: Valid OpenVerse `results: []` responses are successful empty search responses, not typed errors, so Phase 2 can render a normal empty-result UI state.
+- [Phase 2]: OpenVerse search UI is a reusable dialog boundary that calls `onUseImage(result)` only; Phase 3 owns the class-card entry point and actual sample import.
 
 ### Pending Todos
 
-- Plan Phase 2: Student Search UI.
+- Plan Phase 3: Training Workflow Integration.
 
 ### Blockers/Concerns
 
@@ -65,9 +67,10 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | *(none)* | | | |
+| Browser validation | Real browser visual/touch check for OpenVerseSearchDialog, including 2/3/4 grid, hover/focus/touch overlay, and no metadata/filter UI | Deferred to Phase 3/4 after the dialog is reachable in the integrated workflow | Phase 2 verification |
 
 ## Session Continuity
 
 Last session: 2026-05-06
-Stopped at: Phase 1 complete; next step is `$gsd-plan-phase 2`.
+Stopped at: Phase 2 complete; next step is `$gsd-plan-phase 3`.
 Resume file: None

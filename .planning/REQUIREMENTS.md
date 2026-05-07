@@ -26,13 +26,13 @@ Requirements for the initial OpenVerse image-search import feature. Each maps to
 ### Student Search UI
 
 - [ ] **UI-01**: Each image class training area offers an OpenVerse image-search entry point alongside existing camera/file sample options.
-- [ ] **UI-02**: The search flow is scoped to the current class so the student can tell which class will receive the selected image.
-- [ ] **UI-03**: Students can enter a single search term and submit it explicitly.
-- [ ] **UI-04**: Search results render as an image-only grid without visible license, attribution, creator, source, or advanced filter metadata in v1.
-- [ ] **UI-05**: Each result exposes the German action label `Dieses Bild nutzen` on hover and an equivalent focus/tap interaction for keyboard and touch users.
-- [ ] **UI-06**: The UI shows concise German loading, empty-result, retryable-error, rate-limit, and failed-import states.
-- [ ] **UI-07**: Students can load additional results with a simple next-page or `Mehr Ergebnisse` action when OpenVerse returns more pages.
-- [ ] **UI-08**: The UI does not expose advanced OpenVerse filters such as license, source, creator, file type, aspect ratio, or mature-content controls in v1.
+- [x] **UI-02**: The search flow is scoped to the current class so the student can tell which class will receive the selected image.
+- [x] **UI-03**: Students can enter a single search term and submit it explicitly.
+- [x] **UI-04**: Search results render as an image-only grid without visible license, attribution, creator, source, or advanced filter metadata in v1.
+- [x] **UI-05**: Each result exposes the German action label `Dieses Bild nutzen` on hover and an equivalent focus/tap interaction for keyboard and touch users.
+- [x] **UI-06**: The UI shows concise German loading, empty-result, retryable-error, rate-limit, and failed-import states.
+- [x] **UI-07**: Students can load additional results with a simple next-page or `Mehr Ergebnisse` action when OpenVerse returns more pages.
+- [x] **UI-08**: The UI does not expose advanced OpenVerse filters such as license, source, creator, file type, aspect ratio, or mature-content controls in v1.
 
 ### Training Data Integration
 
@@ -46,7 +46,7 @@ Requirements for the initial OpenVerse image-search import feature. Each maps to
 
 - [x] **TEST-01**: Unit tests cover OpenVerse client request construction, response normalization, empty results, invalid responses, and rate-limit errors.
 - [x] **TEST-02**: Unit tests cover remote image import success and failure without mutating class state on failure.
-- [ ] **TEST-03**: Component tests cover the search dialog/grid loading, empty, error, result, hover/focus action, and pagination states.
+- [x] **TEST-03**: Component tests cover the search dialog/grid loading, empty, error, result, hover/focus action, and pagination states.
 - [ ] **TEST-04**: Integration tests cover adding a selected OpenVerse result to the intended class while leaving other classes unchanged.
 - [ ] **TEST-05**: Browser/manual validation checks real OpenVerse searches, real image imports, CORS/canvas behavior, save/load, and training with imported samples.
 
@@ -104,13 +104,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IMPORT-04 | Phase 1 | Complete |
 | IMPORT-05 | Phase 1 | Complete |
 | UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 2 | Pending |
-| UI-03 | Phase 2 | Pending |
-| UI-04 | Phase 2 | Pending |
-| UI-05 | Phase 2 | Pending |
-| UI-06 | Phase 2 | Pending |
-| UI-07 | Phase 2 | Pending |
-| UI-08 | Phase 2 | Pending |
+| UI-02 | Phase 2 | Complete |
+| UI-03 | Phase 2 | Complete |
+| UI-04 | Phase 2 | Complete |
+| UI-05 | Phase 2 | Complete |
+| UI-06 | Phase 2 | Complete |
+| UI-07 | Phase 2 | Complete |
+| UI-08 | Phase 2 | Complete |
 | TRAIN-01 | Phase 3 | Pending |
 | TRAIN-02 | Phase 3 | Pending |
 | TRAIN-03 | Phase 3 | Pending |
@@ -118,7 +118,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRAIN-05 | Phase 3 | Pending |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 1 | Complete |
-| TEST-03 | Phase 2 | Pending |
+| TEST-03 | Phase 2 | Complete |
 | TEST-04 | Phase 3 | Pending |
 | TEST-05 | Phase 4 | Pending |
 
@@ -129,4 +129,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-06 after Phase 1 verification*
+*Last updated: 2026-05-07 after Phase 2 automated verification*
