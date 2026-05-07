@@ -154,6 +154,11 @@
     grid-template-columns: 1fr auto auto;
 }
 
+.managedDatasetHeader {
+    margin: 0 8px 4px 8px;
+    grid-template-columns: 1fr auto;
+}
+
 .datasetName {
     font-weight: 500;
 }

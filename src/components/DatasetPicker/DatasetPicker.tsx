@@ -16,6 +16,10 @@ import DatasetCategoryList, { DatasetCategoryListHandle } from './DatasetCategor
 import { ScrollRootContext, useScrollRootRef } from './ScrollRootContext';
 import styles from './DatasetPicker.module.css';
 import { Alert } from '@mui/material';
+import { useAtomValue } from 'jotai';
+import { datasetState, ProjectDatasetImage } from '@genaitm/state';
+import { canvasToDataUrl, getProjectDatasetImagesBySplit } from '@genaitm/util/projectDatasets';
+import ImageTile from './ImageTile';
 
 interface DatasetPickerProps {
     open: boolean;
@@ -30,9 +34,12 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
     const [loadProgress, setLoadProgress] = useState<LoadProgress>({ loaded: 0, total: 0 });
     const [localDatasets, setLocalDatasets] = useState<Dataset[]>(DATASETS);
     const [selectedCount, setSelectedCount] = useState(0);
+    const [selectedManagedImageIds, setSelectedManagedImageIds] = useState<Set<string>>(() => new Set());
     const [scrollRoot, scrollRootRef] = useScrollRootRef();
     const listRef = useRef<DatasetCategoryListHandle>(null);
     const [error, setError] = useState<string | null>(null);
+    const projectDatasets = useAtomValue(datasetState);
+    const managedTrainingImages = getProjectDatasetImagesBySplit(projectDatasets, 'training');
 
     useEffect(() => {
         if (!open) return;
@@ -45,7 +52,8 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
 
     const handleUse = useCallback(async () => {
         const images = listRef.current?.getSelectedImages() ?? [];
-        if (images.length === 0) return;
+        const managedImages = managedTrainingImages.filter((image) => selectedManagedImageIds.has(image.id));
+        if (images.length === 0 && managedImages.length === 0) return;
 
         setLoading(true);
         setLoadProgress({ loaded: 0, total: images.length });
@@ -54,10 +62,12 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
             const canvases = await loadDatasetImagesInParallel(images as DatasetImage[], (progress) => {
                 setLoadProgress(progress);
             });
+            const selectedCanvases = [...managedImages.map((image) => image.data), ...canvases];
 
-            if (canvases.length > 0) {
-                onDatasetSelected(canvases);
+            if (selectedCanvases.length > 0) {
+                onDatasetSelected(selectedCanvases);
                 listRef.current?.clearSelection();
+                setSelectedManagedImageIds(new Set());
                 onClose();
             } else {
                 setError(t('trainingdata.labels.datasetLoadError'));
@@ -68,16 +78,27 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
         } finally {
             setLoading(false);
         }
-    }, [onDatasetSelected, onClose, t]);
+    }, [managedTrainingImages, onDatasetSelected, onClose, selectedManagedImageIds, t]);
 
     const handleClose = useCallback(() => {
         if (!loading) {
             listRef.current?.clearSelection();
+            setSelectedManagedImageIds(new Set());
             onClose();
         }
     }, [loading, onClose]);
 
+    const toggleManagedImage = useCallback((image: ProjectDatasetImage) => {
+        setSelectedManagedImageIds((current) => {
+            const next = new Set(current);
+            if (next.has(image.id)) next.delete(image.id);
+            else next.add(image.id);
+            return next;
+        });
+    }, []);
+
     const progressPercentage = loadProgress.total > 0 ? (loadProgress.loaded / loadProgress.total) * 100 : 0;
+    const totalSelectedCount = selectedCount + selectedManagedImageIds.size;
 
     return (
         <Dialog
@@ -119,11 +140,45 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
                                 />
                             </div>
                         ) : (
-                            <DatasetCategoryList
-                                ref={listRef}
-                                datasets={localDatasets}
-                                onSelectionChange={setSelectedCount}
-                            />
+                            <>
+                                <DatasetCategoryList
+                                    ref={listRef}
+                                    datasets={localDatasets}
+                                    onSelectionChange={setSelectedCount}
+                                />
+                                {managedTrainingImages.length > 0 && (
+                                <div className={styles.categoryBox}>
+                                    <h3 className={styles.categoryTitle}>DataExplorer</h3>
+                                    <div className={styles.datasetBox}>
+                                        <div className={`${styles.datasetHeader} ${styles.managedDatasetHeader}`}>
+                                            <span className={styles.datasetName}>{t('dataExplorer.split.training')}</span>
+                                            <span className={styles.imageCount}>
+                                                ({managedTrainingImages.length} {t('trainingdata.labels.images')})
+                                            </span>
+                                        </div>
+                                        <div className={styles.imagesRow}>
+                                            {managedTrainingImages.map((image) => {
+                                                const selected = selectedManagedImageIds.has(image.id);
+                                                return (
+                                                    <ImageTile
+                                                        key={image.id}
+                                                        url={canvasToDataUrl(image.data)}
+                                                        alt={t('dataExplorer.labels.image')}
+                                                        imgClassName={styles.datasetImage}
+                                                        selected={selected}
+                                                        containerSelected
+                                                        showCheckbox
+                                                        checked={selected}
+                                                        onCheckboxChange={() => toggleManagedImage(image)}
+                                                        onClick={() => toggleManagedImage(image)}
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                                )}
+                            </>
                         )}
                     </ScrollRootContext.Provider>
                 )}
@@ -146,12 +201,12 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
                 </Button>
                 <Button
                     onClick={handleUse}
-                    disabled={loading || selectedCount === 0}
+                    disabled={loading || totalSelectedCount === 0}
                     variant="contained"
                 >
                     {loading
                         ? t('trainingdata.labels.loading')
-                        : t('trainingdata.actions.use', { count: selectedCount })}
+                        : t('trainingdata.actions.use', { count: totalSelectedCount })}
                 </Button>
             </DialogActions>
         </Dialog>

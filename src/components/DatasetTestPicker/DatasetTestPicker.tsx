@@ -12,6 +12,10 @@ import { useVariant } from '@genaitm/util/variant';
 import styles from '../DatasetPicker/DatasetPicker.module.css';
 import { ScrollRootContext, useScrollRootRef } from '../DatasetPicker/ScrollRootContext';
 import DatasetTestCategoryList from './DatasetTestCategoryList';
+import { useAtomValue } from 'jotai';
+import { datasetState, ProjectDatasetImage } from '@genaitm/state';
+import { canvasToDataUrl, getProjectDatasetImagesBySplit } from '@genaitm/util/projectDatasets';
+import ImageTile from '../DatasetPicker/ImageTile';
 
 interface DatasetTestPickerProps {
     open: boolean;
@@ -30,6 +34,8 @@ export default function DatasetTestPicker({
     const { t } = useTranslation(namespace);
     const [localDatasets, setLocalDatasets] = useState<Dataset[]>(DATASETS);
     const [scrollRoot, scrollRootRef] = useScrollRootRef();
+    const projectDatasets = useAtomValue(datasetState);
+    const managedTestImages = getProjectDatasetImagesBySplit(projectDatasets, 'test');
 
     useEffect(() => {
         if (!open) return;
@@ -59,6 +65,16 @@ export default function DatasetTestPicker({
         [onImageSelected, onImageUrlSelected, onClose]
     );
 
+    const handleManagedImageClick = useCallback(
+        (image: ProjectDatasetImage) => {
+            const dataUrl = canvasToDataUrl(image.data);
+            onImageUrlSelected?.(dataUrl);
+            onImageSelected?.(image.data);
+            onClose();
+        },
+        [onClose, onImageSelected, onImageUrlSelected]
+    );
+
     return (
         <Dialog
             open={open}
@@ -85,6 +101,31 @@ export default function DatasetTestPicker({
                         open={open}
                         onImageClick={handleImageClick}
                     />
+                    {managedTestImages.length > 0 && (
+                        <div className={styles.categoryBox}>
+                            <h3 className={styles.categoryTitle}>DataExplorer</h3>
+                            <div className={styles.datasetBox}>
+                                <div className={`${styles.datasetHeader} ${styles.managedDatasetHeader}`}>
+                                    <span className={styles.datasetName}>{t('dataExplorer.split.test')}</span>
+                                    <span className={styles.imageCount}>
+                                        ({managedTestImages.length} {t('trainingdata.labels.images')})
+                                    </span>
+                                </div>
+                                <div className={styles.imagesRow}>
+                                    {managedTestImages.map((image) => (
+                                        <ImageTile
+                                            key={image.id}
+                                            url={canvasToDataUrl(image.data)}
+                                            alt={t('dataExplorer.labels.image')}
+                                            imgClassName={styles.testImage}
+                                            selected={false}
+                                            onClick={() => handleManagedImageClick(image)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </ScrollRootContext.Provider>
             </DialogContent>
         </Dialog>
