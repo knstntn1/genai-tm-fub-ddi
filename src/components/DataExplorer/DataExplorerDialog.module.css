@@ -78,8 +78,8 @@
 }
 
 .imageGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(188px, 208px));
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.9rem;
     align-items: start;
 }
@@ -90,14 +90,13 @@
     padding: 0.75rem;
     display: grid;
     gap: 0.65rem;
-    min-width: 0;
+    width: 112px;
+    box-sizing: border-box;
 }
 
 .imageCard canvas {
-    width: 100%;
-    max-width: 184px;
-    aspect-ratio: 1;
-    object-fit: cover;
+    width: 80px;
+    height: 80px;
     border-radius: 4px;
     background: #f5f5f5;
     justify-self: center;
