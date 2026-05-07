@@ -124,6 +124,7 @@
             "rateLimit": "Too many searches are active right now. Try again in a moment.",
             "retry": "Try again",
             "more": "More results",
+            "pendingUse": "Adding image...",
             "failedUse": "This image could not be used. Please try again.",
             "fallbackAlt": "OpenVerse image"
         }

@@ -20,6 +20,7 @@ const germanOpenVerse = {
     rateLimit: "Gerade sind zu viele Suchanfragen aktiv. Versuche es gleich noch einmal.",
     retry: "Erneut versuchen",
     more: "Mehr Ergebnisse",
+    pendingUse: "Bild wird hinzugefügt...",
     failedUse: "Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.",
     fallbackAlt: "OpenVerse Bild",
 };
@@ -44,6 +45,7 @@ const englishFallbackOpenVerse = {
     rateLimit: "Too many searches are active right now. Try again in a moment.",
     retry: "Try again",
     more: "More results",
+    pendingUse: "Adding image...",
     failedUse: "This image could not be used. Please try again.",
     fallbackAlt: "OpenVerse image",
 };
@@ -103,8 +105,9 @@ const action = mode === "--write" ? "updated" : "validated";
 console.log(`${action} ${localeFiles.length} image_adv locale files`);
 
 if (mode === "--check" && changed.length > 0) {
-    console.log(`would update ${changed.length} file(s):`);
+    console.error(`would update ${changed.length} file(s):`);
     for (const file of changed) {
-        console.log(`- ${file}`);
+        console.error(`- ${file}`);
     }
+    process.exit(1);
 }

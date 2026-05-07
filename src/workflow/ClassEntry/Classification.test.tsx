@@ -45,6 +45,7 @@ vi.mock('react-i18next', () => ({
                 'trainingdata.openverse.useImage': 'Dieses Bild nutzen',
                 'trainingdata.openverse.initial': 'Suche nach Bildern für diese Klasse.',
                 'trainingdata.openverse.loading': 'Suche Bilder...',
+                'trainingdata.openverse.pendingUse': 'Bild wird hinzugefügt...',
                 'trainingdata.openverse.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
                 'trainingdata.openverse.fallbackAlt': 'OpenVerse Bild',
             };
@@ -223,7 +224,7 @@ describe('Classification component', () => {
             signal: expect.any(AbortSignal),
         });
         expect(setData).toHaveBeenCalledTimes(1);
-        expect(setData).toHaveBeenCalledWith(expect.any(Function), 1);
+        expect(setData).toHaveBeenCalledWith(expect.any(Function), 1, { label: 'Katze', samples: [] });
 
         const updater = setData.mock.calls[0][0] as (old: { label: string; samples: []; disabled?: boolean }) => {
             label: string;
@@ -371,5 +372,40 @@ describe('Classification component', () => {
             samples: { data: HTMLCanvasElement; id: string }[];
         };
         expect(updater({ label: 'Katze', samples: [] }).samples).toEqual([{ data: secondCanvas, id: '' }]);
+    });
+
+    it('keeps the dialog open when the target class update is rejected', async ({ expect }) => {
+        const user = userEvent.setup();
+        const setData = vi.fn(() => false);
+        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+            results: [catResult],
+            page: 1,
+            pageCount: 1,
+            pageSize: 20,
+            resultCount: 1,
+        });
+        vi.mocked(importOpenVerseImage).mockResolvedValue(createCanvas());
+
+        render(
+            <Classification
+                name="Katze"
+                index={1}
+                active={false}
+                data={{ label: 'Katze', samples: [] }}
+                setData={setData}
+                setActive={() => {}}
+                onActivate={() => {}}
+                onDelete={() => {}}
+            />,
+            { wrapper: TestWrapper }
+        );
+
+        await user.click(screen.getByTestId('openversebutton'));
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
+
+        expect(await screen.findByText('Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'OpenVerse: Katze' })).toBeInTheDocument();
     });
 });

@@ -1,6 +1,6 @@
 import { beforeEach, describe, it, vi } from 'vitest';
 import { useEffect, useState } from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TrainingData } from './TrainingData';
 import TestWrapper from '../../util/TestWrapper';
@@ -37,6 +37,14 @@ function createCanvas(testId: string) {
     return canvas;
 }
 
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((res) => {
+        resolve = res;
+    });
+    return { promise, resolve };
+}
+
 function StatefulTrainingData({
     initialData,
     onData,
@@ -49,6 +57,35 @@ function StatefulTrainingData({
     useEffect(() => {
         onData(data);
     }, [data, onData]);
+
+    return (
+        <TrainingData
+            active={true}
+            data={data}
+            setData={setData}
+            onFocused={() => {}}
+        />
+    );
+}
+
+function RemovableTrainingData({
+    initialData,
+    onData,
+    onReadyRemove,
+}: {
+    initialData: IClassification[];
+    onData: (data: IClassification[]) => void;
+    onReadyRemove: (remove: () => void) => void;
+}) {
+    const [data, setData] = useState(initialData);
+
+    useEffect(() => {
+        onData(data);
+    }, [data, onData]);
+
+    useEffect(() => {
+        onReadyRemove(() => setData((current) => current.slice(1)));
+    }, [onReadyRemove]);
 
     return (
         <TrainingData
@@ -172,5 +209,51 @@ describe('TrainingData component', () => {
         expect(latestData[1].samples[0]).toEqual({ data: importedCanvas, id: '' });
         expect(latestData[1].samples[1]).toEqual({ data: existingCanvas, id: 'existing' });
         expect(await screen.findByTestId('imported-canvas')).toBeInTheDocument();
+    });
+
+    it('does not add a late import after same-label classes shift indexes', async ({ expect }) => {
+        const user = userEvent.setup();
+        const pendingImport = deferred<HTMLCanvasElement>();
+        let latestData: IClassification[] = [];
+        let removeFirstClass = () => {};
+        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+            results: [catResult],
+            page: 1,
+            pageCount: 1,
+            pageSize: 20,
+            resultCount: 1,
+        });
+        vi.mocked(importOpenVerseImage).mockReturnValue(pendingImport.promise);
+
+        render(
+            <RemovableTrainingData
+                initialData={[
+                    { label: 'Same', samples: [] },
+                    { label: 'Same', samples: [] },
+                ]}
+                onData={(data) => {
+                    latestData = data;
+                }}
+                onReadyRemove={(remove) => {
+                    removeFirstClass = remove;
+                }}
+            />,
+            { wrapper: TestWrapper }
+        );
+
+        const secondClass = screen.getAllByTestId('widget-Same')[1];
+        await user.click(within(secondClass).getByTestId('openversebutton'));
+        await user.type(screen.getByLabelText('trainingdata.openverse.searchLabel'), 'cat');
+        await user.click(screen.getByRole('button', { name: 'trainingdata.openverse.searchAction' }));
+        await user.click(await screen.findByRole('button', { name: 'trainingdata.openverse.useImage: Cat' }));
+        await act(async () => {
+            removeFirstClass();
+        });
+
+        pendingImport.resolve(createCanvas('late-import'));
+
+        await waitFor(() => expect(latestData).toHaveLength(1));
+        expect(latestData[0].samples).toHaveLength(0);
+        expect(screen.queryByTestId('late-import')).not.toBeInTheDocument();
     });
 });

@@ -47,17 +47,17 @@ export function TrainingData({ active, data, setData, disabled, onFocused }: Pro
     }, [disabled]);
 
     const setDataIx = useCallback(
-        (samples: (old: IClassification) => IClassification, ix: number) => {
-            setData((data) => {
-                if (ix < 0 || ix >= data.length) {
-                    return data;
-                }
-                const newdata = [...data];
-                newdata[ix] = samples(data[ix]);
-                return newdata;
-            });
+        (samples: (old: IClassification) => IClassification, ix: number, expectedData?: IClassification) => {
+            if (ix < 0 || ix >= data.length || (expectedData && data[ix] !== expectedData)) {
+                return false;
+            }
+
+            const newdata = [...data];
+            newdata[ix] = samples(data[ix]);
+            setData(newdata);
+            return true;
         },
-        [setData]
+        [data, setData]
     );
 
     const doActivate = (ix: number) => active && setActiveIndex(ix);

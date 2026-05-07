@@ -25,6 +25,7 @@ vi.mock('react-i18next', () => ({
                     'Gerade sind zu viele Suchanfragen aktiv. Versuche es gleich noch einmal.',
                 'trainingdata.openverse.retry': 'Erneut versuchen',
                 'trainingdata.openverse.more': 'Mehr Ergebnisse',
+                'trainingdata.openverse.pendingUse': 'Bild wird hinzugefügt...',
                 'trainingdata.openverse.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
                 'trainingdata.openverse.emptyQuery': 'Gib zuerst einen Suchbegriff ein.',
                 'trainingdata.aria.close': 'Schließen',
@@ -250,6 +251,19 @@ describe('OpenVerseSearchDialog', () => {
         expect(onUseImage).toHaveBeenNthCalledWith(1, catResult);
         expect(onUseImage).toHaveBeenNthCalledWith(2, catResult);
         expect(onUseImage).toHaveBeenNthCalledWith(3, catResult);
+    });
+
+    it('announces pending selected image use while the callback is running', async ({ expect }) => {
+        const user = userEvent.setup();
+        const searchClient = vi.fn().mockResolvedValue(searchResponse([catResult]));
+        const onUseImage = vi.fn(() => new Promise<void>(() => {}));
+        renderDialog(searchClient, onUseImage);
+
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        await user.click(await screen.findByRole('button', { name: /Dieses Bild nutzen/ }));
+
+        expect(await screen.findByRole('status')).toHaveTextContent('Bild wird hinzugefügt...');
     });
 
     it('loads the next page and appends results', async ({ expect }) => {

@@ -35,7 +35,7 @@ interface Props {
     onActivate: (ix: number) => void;
     onDelete: (ix: number) => void;
     data: IClassification;
-    setData: (data: (old: IClassification) => IClassification, ix: number) => void;
+    setData: (data: (old: IClassification) => IClassification, ix: number, expectedData?: IClassification) => boolean | void;
     setActive: (active: boolean, ix: number) => void;
     index: number;
     onSampleClick?: (classIndex: number, sampleIndex: number) => void;
@@ -296,6 +296,7 @@ export function Classification({
     const handleUseOpenVerseImage = useCallback(
         async (result: OpenVerseImageResult) => {
             const targetLabel = data.label;
+            const targetData = data;
             openVerseImportRef.current.controller?.abort();
             const controller = new AbortController();
             const importId = openVerseImportRef.current.id + 1;
@@ -318,17 +319,21 @@ export function Classification({
             canvas.style.width = '58px';
             canvas.style.height = '58px';
 
-            setData(
+            const inserted = setData(
                 (data) => ({
                     ...data,
                     samples: [{ data: canvas, id: '' }, ...data.samples],
                 }),
-                index
+                index,
+                targetData
             );
+            if (inserted === false) {
+                throw new Error('stale-openverse-import-target');
+            }
             openVerseImportRef.current.controller = null;
             setShowOpenVerseSearch(false);
         },
-        [data.label, index, setData]
+        [data, index, setData]
     );
 
     const handleSampleClick = useCallback(

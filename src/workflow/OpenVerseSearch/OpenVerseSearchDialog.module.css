@@ -144,6 +144,7 @@
     opacity: 1;
 }
 
+.pendingUse,
 .failedUse {
     position: absolute;
     left: 4px;

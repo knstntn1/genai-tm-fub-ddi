@@ -301,6 +301,14 @@ export default function OpenVerseSearchDialog({
                                         className={styles.resultImage}
                                     />
                                     <span className={styles.resultOverlay}>{t('trainingdata.openverse.useImage')}</span>
+                                    {isPending && (
+                                        <span
+                                            className={styles.pendingUse}
+                                            role="status"
+                                        >
+                                            {t('trainingdata.openverse.pendingUse')}
+                                        </span>
+                                    )}
                                     {hasFailed && (
                                         <span
                                             className={styles.failedUse}

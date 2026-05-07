@@ -124,6 +124,7 @@
             "rateLimit": "Gerade sind zu viele Suchanfragen aktiv. Versuche es gleich noch einmal.",
             "retry": "Erneut versuchen",
             "more": "Mehr Ergebnisse",
+            "pendingUse": "Bild wird hinzugefügt...",
             "failedUse": "Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.",
             "fallbackAlt": "OpenVerse Bild"
         }
