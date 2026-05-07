@@ -489,6 +489,10 @@
         "errors": {
             "addFailed": "The image could not be added."
         },
-        "defaultDatasetName": "Dataset"
+        "defaultDatasetName": "Dataset",
+        "sections": {
+            "ownDatasets": "Own datasets",
+            "existingDatasets": "Existing datasets"
+        }
     }
 }

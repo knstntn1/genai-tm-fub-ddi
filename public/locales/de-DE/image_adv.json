@@ -490,6 +490,10 @@
         "errors": {
             "addFailed": "Das Bild konnte nicht hinzugefügt werden."
         },
-        "defaultDatasetName": "Datensatz"
+        "defaultDatasetName": "Datensatz",
+        "sections": {
+            "ownDatasets": "Eigene Datensätze",
+            "existingDatasets": "Vorhandene Datensätze"
+        }
     }
 }

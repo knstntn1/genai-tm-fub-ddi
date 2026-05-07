@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -28,8 +28,10 @@ import {
 import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
 import type { OpenVerseImageResult } from '@genaitm/util/openverse';
 import { useVariant } from '@genaitm/util/variant';
+import { DATASETS, Dataset, fetchAndCacheDatasets } from '@genaitm/util/datasets';
 import WebcamCapture from '@genaitm/workflow/ClassEntry/WebcamCapture';
 import OpenVerseSearchDialog from '@genaitm/workflow/OpenVerseSearch/OpenVerseSearchDialog';
+import DatasetCategory from '@genaitm/components/DatasetPicker/DatasetCategory';
 import styles from './DataExplorerDialog.module.css';
 
 interface Props {
@@ -53,7 +55,17 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     const [showWebcam, setShowWebcam] = useState(false);
     const [showOpenVerse, setShowOpenVerse] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [remoteDatasets, setRemoteDatasets] = useState<Dataset[]>(DATASETS);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        if (DATASETS.length > 0) {
+            setRemoteDatasets([...DATASETS]);
+            return;
+        }
+        fetchAndCacheDatasets().then(setRemoteDatasets);
+    }, [open]);
 
     const selectedDataset = useMemo(
         () => datasets.find((dataset) => dataset.id === selectedDatasetId) ?? datasets[0],
@@ -61,6 +73,15 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     );
 
     const selectedId = selectedDataset?.id ?? null;
+    const remoteDatasetsByCategory = useMemo(
+        () =>
+            remoteDatasets.reduce((acc: Record<string, Dataset[]>, dataset) => {
+                if (!acc[dataset.categoryKey]) acc[dataset.categoryKey] = [];
+                acc[dataset.categoryKey].push(dataset);
+                return acc;
+            }, {}),
+        [remoteDatasets]
+    );
 
     const addDataset = useCallback(() => {
         const dataset = createProjectDataset(newName || t('dataExplorer.defaultDatasetName'));
@@ -206,6 +227,12 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                     )}
                     <div className={styles.layout}>
                         <aside className={styles.sidebar}>
+                            <Typography
+                                component="h3"
+                                className={styles.sidebarTitle}
+                            >
+                                {t('dataExplorer.sections.ownDatasets')}
+                            </Typography>
                             <div className={styles.createRow}>
                                 <TextField
                                     label={t('dataExplorer.fields.datasetName')}
@@ -235,11 +262,18 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                             </div>
                         </aside>
                         <section className={styles.main}>
-                            {!selectedDataset && (
-                                <Typography className={styles.emptyState}>{t('dataExplorer.empty.noDatasets')}</Typography>
-                            )}
-                            {selectedDataset && (
-                                <>
+                            <section className={styles.managedSection}>
+                                <Typography
+                                    component="h3"
+                                    className={styles.sectionTitle}
+                                >
+                                    {t('dataExplorer.sections.ownDatasets')}
+                                </Typography>
+                                {!selectedDataset && (
+                                    <Typography className={styles.emptyState}>{t('dataExplorer.empty.noDatasets')}</Typography>
+                                )}
+                                {selectedDataset && (
+                                    <>
                                     <div className={styles.toolbar}>
                                         <input
                                             ref={fileInputRef}
@@ -308,10 +342,18 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                                     }}
                                                     className={styles.splitToggle}
                                                 >
-                                                    <ToggleButton value="training">
+                                                    <ToggleButton
+                                                        value="training"
+                                                        className={styles.trainingToggle}
+                                                    >
                                                         {t('dataExplorer.split.training')}
                                                     </ToggleButton>
-                                                    <ToggleButton value="test">{t('dataExplorer.split.test')}</ToggleButton>
+                                                    <ToggleButton
+                                                        value="test"
+                                                        className={styles.testToggle}
+                                                    >
+                                                        {t('dataExplorer.split.test')}
+                                                    </ToggleButton>
                                                 </ToggleButtonGroup>
                                                 <Button
                                                     variant="outlined"
@@ -322,8 +364,33 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                             </article>
                                         ))}
                                     </div>
-                                </>
-                            )}
+                                    </>
+                                )}
+                            </section>
+                            <section className={styles.remoteSection}>
+                                <Typography
+                                    component="h3"
+                                    className={styles.sectionTitle}
+                                >
+                                    {t('dataExplorer.sections.existingDatasets')}
+                                </Typography>
+                                {Object.keys(remoteDatasetsByCategory).length === 0 && (
+                                    <Typography className={styles.emptyState}>
+                                        {t('dataExplorer.empty.noExistingDatasets')}
+                                    </Typography>
+                                )}
+                                {Object.entries(remoteDatasetsByCategory).map(([categoryKey, categoryDatasets]) => (
+                                    <Fragment key={categoryKey}>
+                                        {categoryDatasets.length > 0 && (
+                                            <DatasetCategory
+                                                categoryKey={categoryKey}
+                                                datasets={categoryDatasets}
+                                                singleSelect
+                                            />
+                                        )}
+                                    </Fragment>
+                                ))}
+                            </section>
                         </section>
                     </div>
                 </DialogContent>

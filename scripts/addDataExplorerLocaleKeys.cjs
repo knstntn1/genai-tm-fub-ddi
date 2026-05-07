@@ -17,6 +17,10 @@ const fallback = {
     },
     labels: { image: 'Dataset image' },
     errors: { addFailed: 'The image could not be added.' },
+    sections: {
+        ownDatasets: 'Own datasets',
+        existingDatasets: 'Existing datasets',
+    },
     defaultDatasetName: 'Dataset',
 };
 
@@ -34,6 +38,10 @@ const german = {
     },
     labels: { image: 'Datensatzbild' },
     errors: { addFailed: 'Das Bild konnte nicht hinzugefügt werden.' },
+    sections: {
+        ownDatasets: 'Eigene Datensätze',
+        existingDatasets: 'Vorhandene Datensätze',
+    },
     defaultDatasetName: 'Datensatz',
 };
 
