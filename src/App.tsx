@@ -88,7 +88,7 @@ export const routes = createRoutesFromElements(
         />
     </Route>
 );
-const defaultRouter = createBrowserRouter(routes);
+const defaultRouter = createBrowserRouter(routes, { basename: import.meta.env.BASE_URL });
 
 interface Props {
     router?: typeof defaultRouter;
