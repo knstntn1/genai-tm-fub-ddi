@@ -8,6 +8,7 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import GridViewIcon from '@mui/icons-material/GridView';
 import WarningIcon from '@mui/icons-material/Warning';
 import ClassMenu from './ClassMenu';
 import { useTranslation } from 'react-i18next';
@@ -487,6 +488,21 @@ export function Classification({
                                         onClick={doUploadClick}
                                     >
                                         {t('trainingdata.actions.upload')}
+                                    </VerticalButton>
+                                </li>
+                            )}
+                            {!isAudio && (
+                                <li
+                                    className={style.sample}
+                                    style={{ display: !active ? undefined : 'none' }}
+                                >
+                                    <VerticalButton
+                                        data-testid="datasetbutton"
+                                        variant="outlined"
+                                        startIcon={<GridViewIcon />}
+                                        onClick={doDatasetClick}
+                                    >
+                                        {t('trainingdata.actions.datasets')}
                                     </VerticalButton>
                                 </li>
                             )}

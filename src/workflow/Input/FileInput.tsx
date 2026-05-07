@@ -4,6 +4,7 @@ import { Skeleton } from '@mui/material';
 import { useDrop } from 'react-dnd';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import GridViewIcon from '@mui/icons-material/GridView';
 import { useTeachableModel } from '@genaitm/util/TeachableModel';
 import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import style from './Input.module.css';
@@ -12,6 +13,7 @@ import AlertModal from '@genaitm/components/AlertModal';
 import { useVariant } from '@genaitm/util/variant';
 import { validateAudioBlob } from '@genaitm/util/audio';
 import AudioInput from '@genaitm/components/AudioExampleRecorder/AudioInput';
+import DatasetTestPicker from '@genaitm/components/DatasetTestPicker/DatasetTestPicker';
 
 interface Props {
     isAudio: boolean;
@@ -21,13 +23,14 @@ interface Props {
 }
 
 export default function FileInput({ isAudio, example, onExample, enableInput }: Props) {
-    const { namespace } = useVariant();
+    const { namespace, sampleDatasets } = useVariant();
     const { t } = useTranslation(namespace);
     const { imageSize, canPredict } = useTeachableModel();
     const fileRef = useRef<HTMLInputElement>(null);
     const [showDropError, setShowDropError] = useState(false);
     const fileImageRef = useRef<HTMLDivElement>(null);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const [showDatasetPicker, setShowDatasetPicker] = useState(false);
 
     const doDropErrorClose = useCallback(() => setShowDropError(false), [setShowDropError]);
 
@@ -85,6 +88,26 @@ export default function FileInput({ isAudio, example, onExample, enableInput }: 
     );
 
     const doUploadClick = useCallback(() => fileRef.current?.click(), []);
+    const doDatasetClick = useCallback(() => setShowDatasetPicker(true), []);
+    const doDatasetClose = useCallback(() => setShowDatasetPicker(false), []);
+    const scaleToModelSize = useCallback(
+        (canvas: HTMLCanvasElement): HTMLCanvasElement => {
+            if (canvas.width === imageSize && canvas.height === imageSize) return canvas;
+            const scaled = document.createElement('canvas');
+            scaled.width = imageSize;
+            scaled.height = imageSize;
+            const ctx = scaled.getContext('2d');
+            ctx?.drawImage(canvas, 0, 0, imageSize, imageSize);
+            return scaled;
+        },
+        [imageSize]
+    );
+    const handleDatasetImageSelected = useCallback(
+        (canvas: HTMLCanvasElement) => {
+            onExample(scaleToModelSize(canvas));
+        },
+        [onExample, scaleToModelSize]
+    );
 
     const onFileChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,6 +170,17 @@ export default function FileInput({ isAudio, example, onExample, enableInput }: 
                 >
                     {t('input.labels.upload')}
                 </Button>
+                {!isAudio && sampleDatasets && (
+                    <Button
+                        className={style.filesButton}
+                        onClick={doDatasetClick}
+                        disabled={!canPredict || !enableInput}
+                        startIcon={<GridViewIcon fontSize="large" />}
+                        variant="outlined"
+                    >
+                        {t('input.labels.dataset')}
+                    </Button>
+                )}
             </div>
             {isAudio && (
                 <AudioInput
@@ -183,6 +217,13 @@ export default function FileInput({ isAudio, example, onExample, enableInput }: 
             >
                 {t('trainingdata.labels.dropError')}
             </AlertModal>
+            {!isAudio && sampleDatasets && (
+                <DatasetTestPicker
+                    open={showDatasetPicker}
+                    onClose={doDatasetClose}
+                    onImageSelected={handleDatasetImageSelected}
+                />
+            )}
         </div>
     );
 }

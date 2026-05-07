@@ -145,11 +145,6 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
                             </div>
                         ) : (
                             <>
-                                <DatasetCategoryList
-                                    ref={listRef}
-                                    datasets={localDatasets}
-                                    onSelectionChange={setSelectedCount}
-                                />
                                 {managedTrainingDatasets.length > 0 && (
                                     <div className={styles.categoryBox}>
                                         <h3 className={styles.categoryTitle}>DataExplorer</h3>
@@ -193,6 +188,11 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
                                         ))}
                                     </div>
                                 )}
+                                <DatasetCategoryList
+                                    ref={listRef}
+                                    datasets={localDatasets}
+                                    onSelectionChange={setSelectedCount}
+                                />
                             </>
                         )}
                     </ScrollRootContext.Provider>

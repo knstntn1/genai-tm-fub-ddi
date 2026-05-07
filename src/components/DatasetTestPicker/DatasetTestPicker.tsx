@@ -99,11 +99,6 @@ export default function DatasetTestPicker({
             </DialogTitle>
             <DialogContent ref={scrollRootRef}>
                 <ScrollRootContext.Provider value={scrollRoot}>
-                    <DatasetTestCategoryList
-                        datasets={localDatasets}
-                        open={open}
-                        onImageClick={handleImageClick}
-                    />
                     {managedTestDatasets.length > 0 && (
                         <div className={styles.categoryBox}>
                             <h3 className={styles.categoryTitle}>DataExplorer</h3>
@@ -140,6 +135,11 @@ export default function DatasetTestPicker({
                             ))}
                         </div>
                     )}
+                    <DatasetTestCategoryList
+                        datasets={localDatasets}
+                        open={open}
+                        onImageClick={handleImageClick}
+                    />
                 </ScrollRootContext.Provider>
             </DialogContent>
         </Dialog>

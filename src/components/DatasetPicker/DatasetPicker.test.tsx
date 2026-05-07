@@ -92,4 +92,33 @@ describe('DatasetPicker', () => {
         expect(await screen.findByText('Only Test Dataset')).toBeInTheDocument();
         expect(screen.getByText('dataExplorer.empty.noTrainingImages')).toBeInTheDocument();
     });
+
+    it('shows managed datasets before catalogue datasets', async ({ expect }) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 224;
+        canvas.height = 224;
+        canvas.toDataURL = vi.fn(() => 'data:image/png;base64,managed');
+        const store = createStore();
+        store.set(datasetState, [
+            {
+                id: 'ds-1',
+                name: 'Managed Dataset',
+                images: [{ id: 'img-1', split: 'training', data: canvas }],
+            },
+        ]);
+
+        render(
+            <Provider store={store}>
+                <DatasetPicker
+                    open={true}
+                    onClose={() => {}}
+                    onDatasetSelected={() => {}}
+                />
+            </Provider>
+        );
+
+        const managed = await screen.findByText('Managed Dataset');
+        const catalogue = await screen.findByText('dataset.name');
+        expect(managed.compareDocumentPosition(catalogue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
 });

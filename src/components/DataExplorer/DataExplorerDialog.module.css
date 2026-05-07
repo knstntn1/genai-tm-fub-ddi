@@ -90,7 +90,7 @@
     padding: 0.75rem;
     display: grid;
     gap: 0.65rem;
-    width: 112px;
+    width: 176px;
     box-sizing: border-box;
 }
 
@@ -106,16 +106,18 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 32px;
+    width: 100%;
 }
 
 .splitToggle :global(.MuiToggleButton-root) {
     min-width: 0;
-    padding: 0.28rem 0.45rem;
+    padding: 0.28rem 0.35rem;
     font-size: 0.76rem;
     line-height: 1.1;
     font-weight: 700;
     letter-spacing: 0;
     text-transform: none;
+    white-space: nowrap;
 }
 
 .trainingToggle {

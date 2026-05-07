@@ -17,7 +17,6 @@ import { AudioExample } from '@genai-fi/classifier';
 import FileInput from './FileInput';
 import AudioInput from '@genaitm/components/AudioExampleRecorder/AudioInput';
 import RemoteInput from './RemoteInput';
-import DatasetInput from './DatasetInput';
 
 interface Props {
     disabled?: boolean;
@@ -25,7 +24,7 @@ interface Props {
 }
 
 export default function Input(props: Props) {
-    const { namespace, enableFileInput, sampleDatasets, modelVariant } = useVariant();
+    const { namespace, enableFileInput, modelVariant } = useVariant();
     const { t } = useTranslation(namespace);
     const [enableInputSwitch, setEnableInput] = useAtom(enableCamInput);
     const [tabIndex, setTabIndex] = useState(0);
@@ -188,16 +187,6 @@ export default function Input(props: Props) {
                                     value={2}
                                 />
                             )}
-                            {sampleDatasets && !isAudio && (
-                                <Tab
-                                    disabled={!canPredict}
-                                    className={style.datasetTab}
-                                    label={t('input.labels.dataset')}
-                                    id="input-tab-3"
-                                    aria-controls="input-panel-3"
-                                    value={3}
-                                />
-                            )}
                         </Tabs>
                     </div>
                     {isAudio && (
@@ -249,19 +238,6 @@ export default function Input(props: Props) {
                             enabled={enableInput}
                         >
                             <RemoteInput />
-                        </TabPanel>
-                    )}
-                    {sampleDatasets && !isAudio && (
-                        <TabPanel
-                            value={tabIndex}
-                            index={3}
-                            enabled={enableInput}
-                        >
-                            <DatasetInput
-                                example={file ?? undefined}
-                                onExample={setFile}
-                                enableInput={enableInput && tabIndex === 3}
-                            />
                         </TabPanel>
                     )}
                 </div>

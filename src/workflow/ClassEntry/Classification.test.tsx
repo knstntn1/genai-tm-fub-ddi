@@ -31,6 +31,7 @@ vi.mock('react-i18next', () => ({
                 'trainingdata.actions.webcam': 'Webcam',
                 'trainingdata.actions.audio': 'Mikrofon',
                 'trainingdata.actions.upload': 'Hochladen',
+                'trainingdata.actions.datasets': 'Datensätze',
                 'trainingdata.actions.openverse': 'Bildsuche',
                 'trainingdata.labels.addSamples': 'Bildbeispiele hinzufügen',
                 'trainingdata.labels.addAudioSamples': 'Audiobeispiele hinzufügen',
@@ -121,7 +122,7 @@ describe('Classification component', () => {
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
     });
 
-    it('shows the OpenVerse image search action beside camera and upload for image classes', async ({ expect }) => {
+    it('shows dataset and OpenVerse actions beside camera and upload for image classes', async ({ expect }) => {
         render(
             <Classification
                 name="Katze"
@@ -138,6 +139,7 @@ describe('Classification component', () => {
 
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
         expect(screen.getByTestId('uploadbutton')).toBeInTheDocument();
+        expect(screen.getByTestId('datasetbutton')).toHaveTextContent('Datensätze');
         expect(screen.getByTestId('openversebutton')).toHaveTextContent('Bildsuche');
     });
 
@@ -181,6 +183,7 @@ describe('Classification component', () => {
         );
 
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
+        expect(screen.queryByTestId('datasetbutton')).not.toBeInTheDocument();
         expect(screen.queryByTestId('openversebutton')).not.toBeInTheDocument();
         expect(screen.queryByText('Bildsuche')).not.toBeInTheDocument();
     });
