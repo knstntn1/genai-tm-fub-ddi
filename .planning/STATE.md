@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-05-06)
 
 **Core value:** Students can add useful image examples to a class through a trivial OpenVerse search flow without leaving the training-data workflow.
-**Current focus:** Phase 4: Live Browser Validation
+**Current focus:** Milestone complete
 
 ## Current Position
 
 Phase: 4 of 4 (Live Browser Validation)
-Plan: TBD
-Status: Ready to plan
-Last activity: 2026-05-07 - Phase 3 executed, review findings fixed, code-reviewed clean, UI-reviewed 20/24, and verified passed. Browser visual/touch/live-provider validation remains deferred to Phase 4.
+Plan: 04-01
+Status: Complete
+Last activity: 2026-05-07 - Phase 4 live browser validation passed. A live training blocker was found and fixed by normalizing OpenVerse imports to 224x224 training canvases; real search/import, failed-provider recovery, desktop/tablet/mobile behavior, save/load, and training all validated.
 
-Progress: [████████--] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: same-day execution
 - Total execution time: 0.0 hours tracked
 
@@ -30,10 +30,11 @@ Progress: [████████--] 75%
 | Phase 1 | 2 | same-day | same-day |
 | Phase 2 | 2 | same-day | same-day |
 | Phase 3 | 1 | same-day | same-day |
+| Phase 4 | 1 | same-day | same-day |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 OpenVerse API Client, 01-02 Remote Image Import Boundary, 02-01 OpenVerse Search Dialog, 02-02 OpenVerse Locale Keys, 03-01 Training Workflow Integration
-- Trend: Phase 3 complete; Phase 4 live browser validation next
+- Last 5 plans: 01-02 Remote Image Import Boundary, 02-01 OpenVerse Search Dialog, 02-02 OpenVerse Locale Keys, 03-01 Training Workflow Integration, 04-01 Live Browser Validation
+- Trend: Milestone complete
 
 *Updated after each plan completion*
 
@@ -52,15 +53,16 @@ Recent decisions affecting current work:
 - [Phase 2]: OpenVerse search UI is a reusable dialog boundary that calls `onUseImage(result)` only; Phase 3 owns the class-card entry point and actual sample import.
 - [Phase 3]: OpenVerse imports are guarded by class object identity, not label alone, so same-label class shifts cannot receive stale imports.
 - [Phase 3]: `scripts/addOpenVerseLocaleKeys.cjs --check` now exits non-zero on locale drift.
+- [Phase 4]: OpenVerse imports must normalize remote images to the model's `224x224` square training-canvas shape before adding samples.
+- [Phase 4]: Direct browser OpenVerse import is sufficient for v1 after the training-canvas normalization fix; proxy/cache remains v2 unless classroom pilots reveal school-network, hotlink, rate-limit, or policy issues.
 
 ### Pending Todos
 
-- Plan Phase 4: Live Browser Validation.
+- None for v1 OpenVerse image search.
 
 ### Blockers/Concerns
 
-- Real OpenVerse provider image CORS/canvas behavior remains uncertain until live browser validation.
-- Anonymous OpenVerse rate limits and classroom-network behavior must be checked before v1 is considered validated.
+- Anonymous OpenVerse rate limits and classroom-network behavior should still be monitored during classroom pilots.
 - Client-side `mature=false` is best-effort and does not guarantee complete classroom-safe results.
 
 ## Deferred Items
@@ -70,12 +72,12 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | *(none)* | | | |
-| Browser validation | Real browser visual/touch check for OpenVerseSearchDialog, including 2/3/4 grid, hover/focus/touch overlay, and no metadata/filter UI | Deferred to Phase 3/4 after the dialog is reachable in the integrated workflow | Phase 2 verification |
-| Browser validation | Real browser desktop/tablet/mobile check for `Bildsuche` label fit, focus return, touch reachability, and integrated dialog overlay access | Deferred to Phase 4 after Phase 3 UI audit | Phase 3 UI review |
-| Live provider validation | Real OpenVerse provider/CORS/canvas readability, browser save/load, and training with imported samples | Deferred to Phase 4 per roadmap | Phase 3 verification |
+| Browser validation | Real browser visual/touch check for OpenVerseSearchDialog, including 2/3/4 grid, hover/focus/touch overlay, and no metadata/filter UI | Completed in Phase 4 browser validation | Phase 4 verification |
+| Browser validation | Real browser desktop/tablet/mobile check for `Bildsuche` label fit, focus return, touch reachability, and integrated dialog overlay access | Completed in Phase 4 browser validation | Phase 4 verification |
+| Live provider validation | Real OpenVerse provider/CORS/canvas readability, browser save/load, and training with imported samples | Completed in Phase 4 browser validation | Phase 4 verification |
 
 ## Session Continuity
 
 Last session: 2026-05-07
-Stopped at: Phase 3 complete; next step is `$gsd-plan-phase 4`.
+Stopped at: Milestone complete; next step is optional ship/review.
 Resume file: None
