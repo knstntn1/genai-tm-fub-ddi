@@ -459,10 +459,16 @@ export function Classification({
 
                         <ol
                             ref={scrollRef}
-                            className={active ? style.samplelistLarge : style.samplelistSmall}
+                            className={
+                                active
+                                    ? style.samplelistLarge
+                                    : data.samples.length === 0
+                                      ? style.actionList
+                                      : style.samplelistSmall
+                            }
                         >
                             <li
-                                className={style.sample}
+                                className={`${style.sample} ${style.actionSample}`}
                                 style={{ display: !active ? undefined : 'none' }}
                             >
                                 <VerticalButton
@@ -478,7 +484,7 @@ export function Classification({
 
                             {sampleUploadFile && (
                                 <li
-                                    className={style.sample}
+                                    className={`${style.sample} ${style.actionSample}`}
                                     style={{ display: !active ? undefined : 'none' }}
                                 >
                                     <VerticalButton
@@ -493,7 +499,7 @@ export function Classification({
                             )}
                             {!isAudio && (
                                 <li
-                                    className={style.sample}
+                                    className={`${style.sample} ${style.actionSample}`}
                                     style={{ display: !active ? undefined : 'none' }}
                                 >
                                     <VerticalButton
@@ -508,7 +514,7 @@ export function Classification({
                             )}
                             {!isAudio && (
                                 <li
-                                    className={style.sample}
+                                    className={`${style.sample} ${style.actionSample}`}
                                     style={{ display: !active ? undefined : 'none' }}
                                 >
                                     <VerticalButton
@@ -522,7 +528,7 @@ export function Classification({
                                 </li>
                             )}
                             {data.samples.length === 0 && !active && !dropProps.hovered && !loading && (
-                                <li>
+                                <li className={style.dropSuggestItem}>
                                     <div className={doAnimation ? style.dropSuggestAnimated : style.dropSuggest}>
                                         {t(
                                             isAudio

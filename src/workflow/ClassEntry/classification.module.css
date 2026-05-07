@@ -12,14 +12,14 @@
     color: primary;
     display: flex;
     align-items: center;
-    min-height: 58px;
+    min-height: 24px;
     box-sizing: border-box;
     padding: 0;
-    font-size: 11pt;
-    text-align: center;
+    font-size: 10pt;
+    line-height: 1.25;
+    text-align: left;
     background: transparent;
-    position: relative;
-    top: -1rem;
+    position: static;
 }
 
 .dropSuggestAnimated {
@@ -78,7 +78,7 @@
     display: flex;
     flex-direction: row;
     gap: 0.3rem;
-    max-width: 400px;
+    max-width: 100%;
     padding: 1rem;
     justify-content: start;
     align-content: start;
@@ -100,6 +100,15 @@
     flex-wrap: nowrap;
 }
 
+.actionList {
+    composes: samplelist;
+    flex-wrap: wrap;
+    overflow: visible;
+    height: auto;
+    padding-top: 0.75rem;
+    row-gap: 0.45rem;
+}
+
 .samplesLabel {
     margin-left: 1rem;
     margin-top: 1rem;
@@ -113,6 +122,24 @@
     flex-shrink: 0;
     position: relative;
     display: flex;
+}
+
+.actionSample {
+    width: 128px;
+}
+
+.actionSample :global(.MuiButton-root) {
+    width: 100%;
+    min-width: 0;
+    padding: 5px 6px;
+}
+
+.dropSuggestItem {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 24px;
+    flex-shrink: 1;
 }
 
 /*.sample button {
