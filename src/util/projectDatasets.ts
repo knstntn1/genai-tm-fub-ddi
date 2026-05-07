@@ -185,7 +185,12 @@ export async function loadProjectDatasetsFromZip(file: Blob): Promise<ProjectDat
     const manifestFile = zip.file(MANIFEST_PATH);
     if (!manifestFile) return [];
 
-    const manifest = normalizeManifest(JSON.parse(await manifestFile.async('string')));
+    let manifest: ProjectDatasetsManifest;
+    try {
+        manifest = normalizeManifest(JSON.parse(await manifestFile.async('string')));
+    } catch {
+        return [];
+    }
     const datasets: ProjectDataset[] = [];
 
     for (const dataset of manifest.datasets) {
@@ -194,12 +199,16 @@ export async function loadProjectDatasetsFromZip(file: Blob): Promise<ProjectDat
         for (const image of dataset.images) {
             const imageFile = zip.file(image.path);
             if (!imageFile) continue;
-            images.push({
-                id: image.id,
-                split: image.split,
-                source: image.source,
-                data: await blobToCanvas(await imageFile.async('blob')),
-            });
+            try {
+                images.push({
+                    id: image.id,
+                    split: image.split,
+                    source: image.source,
+                    data: await blobToCanvas(await imageFile.async('blob')),
+                });
+            } catch {
+                // Dataset images are optional project metadata. Keep loading the core project.
+            }
         }
 
         datasets.push({

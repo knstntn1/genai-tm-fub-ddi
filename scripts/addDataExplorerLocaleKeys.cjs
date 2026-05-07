@@ -55,6 +55,7 @@ function mergeMissing(target, source) {
 }
 
 let changedFiles = 0;
+const checkMode = process.argv.includes('--check');
 for (const locale of fs.readdirSync(localeRoot)) {
     const file = path.join(localeRoot, locale, 'image_adv.json');
     if (!fs.existsSync(file)) continue;
@@ -62,11 +63,13 @@ for (const locale of fs.readdirSync(localeRoot)) {
     const source = locale === 'de-DE' ? german : fallback;
     if (mergeMissing(json, { dataExplorer: source })) {
         changedFiles += 1;
-        fs.writeFileSync(file, `${JSON.stringify(json, null, 4)}\n`);
+        if (!checkMode) {
+            fs.writeFileSync(file, `${JSON.stringify(json, null, 4)}\n`);
+        }
     }
 }
 
-if (process.argv.includes('--check') && changedFiles > 0) {
+if (checkMode && changedFiles > 0) {
     console.error(`dataExplorer locale drift in ${changedFiles} files`);
     process.exit(1);
 }

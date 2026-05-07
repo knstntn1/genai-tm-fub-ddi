@@ -23,6 +23,7 @@ vi.mock('@genaitm/workflow/OpenVerseSearch/OpenVerseSearchDialog', () => ({
 describe('DataExplorerDialog', () => {
     it('creates datasets and changes image split tags', async ({ expect }) => {
         const user = userEvent.setup();
+        const onChanged = vi.fn();
         const canvas = document.createElement('canvas');
         canvas.width = 224;
         canvas.height = 224;
@@ -42,6 +43,7 @@ describe('DataExplorerDialog', () => {
                 <DataExplorerDialog
                     open={true}
                     onClose={() => {}}
+                    onChanged={onChanged}
                 />
             </Provider>
         );
@@ -53,5 +55,6 @@ describe('DataExplorerDialog', () => {
         await user.type(screen.getByLabelText('dataExplorer.fields.datasetName'), 'Neu');
         await user.click(screen.getByLabelText('dataExplorer.actions.createDataset'));
         expect(screen.getByText('Neu (0)')).toBeInTheDocument();
+        expect(onChanged).toHaveBeenCalledTimes(2);
     });
 });

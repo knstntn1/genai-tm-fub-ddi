@@ -35,6 +35,7 @@ import styles from './DataExplorerDialog.module.css';
 interface Props {
     open: boolean;
     onClose: () => void;
+    onChanged?: () => void;
 }
 
 function prepareCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
@@ -43,7 +44,7 @@ function prepareCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
     return canvas;
 }
 
-export default function DataExplorerDialog({ open, onClose }: Props) {
+export default function DataExplorerDialog({ open, onClose, onChanged }: Props) {
     const { namespace } = useVariant();
     const { t } = useTranslation(namespace);
     const [datasets, setDatasets] = useAtom(datasetState);
@@ -64,15 +65,17 @@ export default function DataExplorerDialog({ open, onClose }: Props) {
     const addDataset = useCallback(() => {
         const dataset = createProjectDataset(newName || t('dataExplorer.defaultDatasetName'));
         setDatasets((current) => [...current, dataset]);
+        onChanged?.();
         setSelectedDatasetId(dataset.id);
         setNewName('');
-    }, [newName, setDatasets, t]);
+    }, [newName, onChanged, setDatasets, t]);
 
     const deleteSelectedDataset = useCallback(() => {
         if (!selectedId) return;
         setDatasets((current) => current.filter((dataset) => dataset.id !== selectedId));
+        onChanged?.();
         setSelectedDatasetId(null);
-    }, [selectedId, setDatasets]);
+    }, [onChanged, selectedId, setDatasets]);
 
     const addCanvasesToSelected = useCallback(
         (canvases: HTMLCanvasElement[], source: 'upload' | 'webcam' | 'openverse') => {
@@ -90,9 +93,10 @@ export default function DataExplorerDialog({ open, onClose }: Props) {
                     };
                 })
             );
+            if (inserted) onChanged?.();
             return inserted;
         },
-        [selectedId, setDatasets]
+        [onChanged, selectedId, setDatasets]
     );
 
     const handleFiles = useCallback(
@@ -141,25 +145,28 @@ export default function DataExplorerDialog({ open, onClose }: Props) {
                 })
             );
             if (!inserted) throw new Error('dataset-missing');
+            onChanged?.();
             setShowOpenVerse(false);
         },
-        [selectedId, setDatasets]
+        [onChanged, selectedId, setDatasets]
     );
 
     const updateSplit = useCallback(
         (imageId: string, split: DatasetSplit) => {
             if (!selectedId) return;
             setDatasets((current) => updateProjectDatasetImageSplit(current, selectedId, imageId, split));
+            onChanged?.();
         },
-        [selectedId, setDatasets]
+        [onChanged, selectedId, setDatasets]
     );
 
     const removeImage = useCallback(
         (imageId: string) => {
             if (!selectedId) return;
             setDatasets((current) => removeProjectDatasetImage(current, selectedId, imageId));
+            onChanged?.();
         },
-        [selectedId, setDatasets]
+        [onChanged, selectedId, setDatasets]
     );
 
     const handleClose = useCallback(() => {

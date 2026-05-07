@@ -68,4 +68,12 @@ describe('projectDatasets', () => {
 
         await expect(loadProjectDatasetsFromZip(blob)).resolves.toEqual([]);
     });
+
+    it('ignores malformed optional dataset manifests', async ({ expect }) => {
+        const zip = new JSZip();
+        zip.file(PROJECT_DATASETS_MANIFEST_PATH, '{not-json');
+        const blob = await zip.generateAsync({ type: 'blob' });
+
+        await expect(loadProjectDatasetsFromZip(blob)).resolves.toEqual([]);
+    });
 });

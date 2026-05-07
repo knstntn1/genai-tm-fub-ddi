@@ -172,6 +172,13 @@ export default function Workspace({ step, visitedStep, onComplete, saveTrigger, 
         hasAlert = false;
     }, []);
 
+    const doDatasetChanged = useCallback(() => {
+        addCloseAlert();
+        if (saveTimer.current === -1) {
+            setTimeout(onSaveRemind, SAVE_PERIOD);
+        }
+    }, [onSaveRemind]);
+
     const doSave = useCallback(
         (props: SaveProperties) => {
             setSaving(props);
@@ -256,6 +263,7 @@ export default function Workspace({ step, visitedStep, onComplete, saveTrigger, 
             <DataExplorerDialog
                 open={dataExplorerOpen}
                 onClose={doDataExplorerClose}
+                onChanged={doDatasetChanged}
             />
             <ExportDialog
                 open={showShare}

@@ -62,7 +62,7 @@ export function ModelSaver({ onSaved }: Props) {
                 model,
                 saving.behaviours ? behaviours : undefined,
                 saving.samples ? data : undefined,
-                datasets
+                saving.samples ? datasets : []
             ).then(() => {
                 setSaving(null);
                 if (onSaved) onSaved();

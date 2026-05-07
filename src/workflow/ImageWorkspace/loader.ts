@@ -17,7 +17,8 @@ interface Project {
 }
 
 export async function loadProject(file: File | Blob): Promise<Project> {
-    const [app, datasets] = await Promise.all([ClassifierApp.load(file), loadProjectDatasetsFromZip(file)]);
+    const app = await ClassifierApp.load(file);
+    const datasets = await loadProjectDatasetsFromZip(file).catch(() => []);
 
     return {
         id: app.projectId,
