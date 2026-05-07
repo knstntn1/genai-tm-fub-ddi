@@ -18,7 +18,7 @@ import styles from './DatasetPicker.module.css';
 import { Alert } from '@mui/material';
 import { useAtomValue } from 'jotai';
 import { datasetState, ProjectDatasetImage } from '@genaitm/state';
-import { canvasToDataUrl, getProjectDatasetImagesBySplit } from '@genaitm/util/projectDatasets';
+import { canvasToDataUrl } from '@genaitm/util/projectDatasets';
 import ImageTile from './ImageTile';
 
 interface DatasetPickerProps {
@@ -39,7 +39,11 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
     const listRef = useRef<DatasetCategoryListHandle>(null);
     const [error, setError] = useState<string | null>(null);
     const projectDatasets = useAtomValue(datasetState);
-    const managedTrainingImages = getProjectDatasetImagesBySplit(projectDatasets, 'training');
+    const managedTrainingDatasets = projectDatasets.map((dataset) => ({
+        dataset,
+        images: dataset.images.filter((image) => image.split === 'training'),
+    }));
+    const managedTrainingImages = managedTrainingDatasets.flatMap(({ images }) => images);
 
     useEffect(() => {
         if (!open) return;
@@ -146,37 +150,48 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
                                     datasets={localDatasets}
                                     onSelectionChange={setSelectedCount}
                                 />
-                                {managedTrainingImages.length > 0 && (
-                                <div className={styles.categoryBox}>
-                                    <h3 className={styles.categoryTitle}>DataExplorer</h3>
-                                    <div className={styles.datasetBox}>
-                                        <div className={`${styles.datasetHeader} ${styles.managedDatasetHeader}`}>
-                                            <span className={styles.datasetName}>{t('dataExplorer.split.training')}</span>
-                                            <span className={styles.imageCount}>
-                                                ({managedTrainingImages.length} {t('trainingdata.labels.images')})
-                                            </span>
-                                        </div>
-                                        <div className={styles.imagesRow}>
-                                            {managedTrainingImages.map((image) => {
-                                                const selected = selectedManagedImageIds.has(image.id);
-                                                return (
-                                                    <ImageTile
-                                                        key={image.id}
-                                                        url={canvasToDataUrl(image.data)}
-                                                        alt={t('dataExplorer.labels.image')}
-                                                        imgClassName={styles.datasetImage}
-                                                        selected={selected}
-                                                        containerSelected
-                                                        showCheckbox
-                                                        checked={selected}
-                                                        onCheckboxChange={() => toggleManagedImage(image)}
-                                                        onClick={() => toggleManagedImage(image)}
-                                                    />
-                                                );
-                                            })}
-                                        </div>
+                                {managedTrainingDatasets.length > 0 && (
+                                    <div className={styles.categoryBox}>
+                                        <h3 className={styles.categoryTitle}>DataExplorer</h3>
+                                        {managedTrainingDatasets.map(({ dataset, images }) => (
+                                            <div
+                                                className={styles.datasetBox}
+                                                key={dataset.id}
+                                            >
+                                                <div className={`${styles.datasetHeader} ${styles.managedDatasetHeader}`}>
+                                                    <span className={styles.datasetName}>{dataset.name}</span>
+                                                    <span className={styles.imageCount}>
+                                                        ({images.length} {t('trainingdata.labels.images')})
+                                                    </span>
+                                                </div>
+                                                {images.length === 0 ? (
+                                                    <p className={styles.emptyManagedDataset}>
+                                                        {t('dataExplorer.empty.noTrainingImages')}
+                                                    </p>
+                                                ) : (
+                                                    <div className={styles.imagesRow}>
+                                                        {images.map((image) => {
+                                                            const selected = selectedManagedImageIds.has(image.id);
+                                                            return (
+                                                                <ImageTile
+                                                                    key={image.id}
+                                                                    url={canvasToDataUrl(image.data)}
+                                                                    alt={t('dataExplorer.labels.image')}
+                                                                    imgClassName={styles.datasetImage}
+                                                                    selected={selected}
+                                                                    containerSelected
+                                                                    showCheckbox
+                                                                    checked={selected}
+                                                                    onCheckboxChange={() => toggleManagedImage(image)}
+                                                                    onClick={() => toggleManagedImage(image)}
+                                                                />
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
                                 )}
                             </>
                         )}

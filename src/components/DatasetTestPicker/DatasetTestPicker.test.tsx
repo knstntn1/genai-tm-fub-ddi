@@ -51,4 +51,29 @@ describe('DatasetTestPicker', () => {
         expect(onImageUrlSelected).toHaveBeenCalledWith('data:image/png;base64,test');
         expect(onClose).toHaveBeenCalled();
     });
+
+    it('keeps managed dataset visible when it has no test images', async ({ expect }) => {
+        const store = createStore();
+        store.set(datasetState, [
+            {
+                id: 'ds-1',
+                name: 'Only Training Dataset',
+                images: [{ id: 'img-1', split: 'training', data: createCanvas() }],
+            },
+        ]);
+
+        render(
+            <Provider store={store}>
+                <DatasetTestPicker
+                    open={true}
+                    onClose={() => {}}
+                    onImageSelected={() => {}}
+                    onImageUrlSelected={() => {}}
+                />
+            </Provider>
+        );
+
+        expect(screen.getByText('Only Training Dataset')).toBeInTheDocument();
+        expect(screen.getByText('dataExplorer.empty.noTestImages')).toBeInTheDocument();
+    });
 });

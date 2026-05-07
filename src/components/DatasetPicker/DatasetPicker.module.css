@@ -168,6 +168,12 @@
     justify-self: end;
 }
 
+.emptyManagedDataset {
+    margin: 0 8px 12px 8px;
+    color: textDark;
+    font-size: 0.9rem;
+}
+
 .selectedCount {
     color: primary;
     justify-self: start;

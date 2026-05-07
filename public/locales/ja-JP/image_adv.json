@@ -482,7 +482,9 @@
         },
         "empty": {
             "noDatasets": "Create a dataset to add images.",
-            "noImages": "Add images by upload, webcam, or image search."
+            "noImages": "Add images by upload, webcam, or image search.",
+            "noTrainingImages": "No images are tagged as training data.",
+            "noTestImages": "No images are tagged as test data."
         },
         "labels": {
             "image": "Dataset image"

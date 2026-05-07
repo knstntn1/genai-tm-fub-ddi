@@ -482,7 +482,9 @@
         },
         "empty": {
             "noDatasets": "Erstelle einen Datensatz, um Bilder hinzuzufügen.",
-            "noImages": "Füge Bilder per Upload, Webcam oder Bildsuche hinzu."
+            "noImages": "Füge Bilder per Upload, Webcam oder Bildsuche hinzu.",
+            "noTrainingImages": "Keine Bilder als Training getaggt.",
+            "noTestImages": "Keine Bilder als Test getaggt."
         },
         "labels": {
             "image": "Datensatzbild"

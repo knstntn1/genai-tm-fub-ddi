@@ -65,4 +65,31 @@ describe('DatasetPicker', () => {
 
         expect(onDatasetSelected).toHaveBeenCalledWith([canvas]);
     });
+
+    it('keeps managed dataset visible when it has no training images', async ({ expect }) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 224;
+        canvas.height = 224;
+        const store = createStore();
+        store.set(datasetState, [
+            {
+                id: 'ds-1',
+                name: 'Only Test Dataset',
+                images: [{ id: 'img-1', split: 'test', data: canvas }],
+            },
+        ]);
+
+        render(
+            <Provider store={store}>
+                <DatasetPicker
+                    open={true}
+                    onClose={() => {}}
+                    onDatasetSelected={() => {}}
+                />
+            </Provider>
+        );
+
+        expect(await screen.findByText('Only Test Dataset')).toBeInTheDocument();
+        expect(screen.getByText('dataExplorer.empty.noTrainingImages')).toBeInTheDocument();
+    });
 });

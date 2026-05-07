@@ -14,6 +14,8 @@ const fallback = {
     empty: {
         noDatasets: 'Create a dataset to add images.',
         noImages: 'Add images by upload, webcam, or image search.',
+        noTrainingImages: 'No images are tagged as training data.',
+        noTestImages: 'No images are tagged as test data.',
     },
     labels: { image: 'Dataset image' },
     errors: { addFailed: 'The image could not be added.' },
@@ -35,6 +37,8 @@ const german = {
     empty: {
         noDatasets: 'Erstelle einen Datensatz, um Bilder hinzuzufügen.',
         noImages: 'Füge Bilder per Upload, Webcam oder Bildsuche hinzu.',
+        noTrainingImages: 'Keine Bilder als Training getaggt.',
+        noTestImages: 'Keine Bilder als Test getaggt.',
     },
     labels: { image: 'Datensatzbild' },
     errors: { addFailed: 'Das Bild konnte nicht hinzugefügt werden.' },
