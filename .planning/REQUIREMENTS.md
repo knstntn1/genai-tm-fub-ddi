@@ -25,7 +25,7 @@ Requirements for the initial OpenVerse image-search import feature. Each maps to
 
 ### Student Search UI
 
-- [ ] **UI-01**: Each image class training area offers an OpenVerse image-search entry point alongside existing camera/file sample options.
+- [x] **UI-01**: Each image class training area offers an OpenVerse image-search entry point alongside existing camera/file sample options.
 - [x] **UI-02**: The search flow is scoped to the current class so the student can tell which class will receive the selected image.
 - [x] **UI-03**: Students can enter a single search term and submit it explicitly.
 - [x] **UI-04**: Search results render as an image-only grid without visible license, attribution, creator, source, or advanced filter metadata in v1.
@@ -36,18 +36,18 @@ Requirements for the initial OpenVerse image-search import feature. Each maps to
 
 ### Training Data Integration
 
-- [ ] **TRAIN-01**: Clicking a usable OpenVerse result adds the converted image to the selected class as a normal trainable image sample.
-- [ ] **TRAIN-02**: Imported OpenVerse samples appear in the existing class sample list/count immediately after successful import.
-- [ ] **TRAIN-03**: Existing sample deletion, movement, project save/load, and model training continue to work with OpenVerse-imported samples.
-- [ ] **TRAIN-04**: A stale or slow OpenVerse search/import cannot add an image to the wrong class after class state changes.
-- [ ] **TRAIN-05**: OpenVerse search is only available for image-class training workflows and does not appear in non-image variants unless explicitly enabled later.
+- [x] **TRAIN-01**: Clicking a usable OpenVerse result adds the converted image to the selected class as a normal trainable image sample.
+- [x] **TRAIN-02**: Imported OpenVerse samples appear in the existing class sample list/count immediately after successful import.
+- [x] **TRAIN-03**: Existing sample deletion, movement, project save/load, and model training continue to work with OpenVerse-imported samples.
+- [x] **TRAIN-04**: A stale or slow OpenVerse search/import cannot add an image to the wrong class after class state changes.
+- [x] **TRAIN-05**: OpenVerse search is only available for image-class training workflows and does not appear in non-image variants unless explicitly enabled later.
 
 ### Validation and Tests
 
 - [x] **TEST-01**: Unit tests cover OpenVerse client request construction, response normalization, empty results, invalid responses, and rate-limit errors.
 - [x] **TEST-02**: Unit tests cover remote image import success and failure without mutating class state on failure.
 - [x] **TEST-03**: Component tests cover the search dialog/grid loading, empty, error, result, hover/focus action, and pagination states.
-- [ ] **TEST-04**: Integration tests cover adding a selected OpenVerse result to the intended class while leaving other classes unchanged.
+- [x] **TEST-04**: Integration tests cover adding a selected OpenVerse result to the intended class while leaving other classes unchanged.
 - [ ] **TEST-05**: Browser/manual validation checks real OpenVerse searches, real image imports, CORS/canvas behavior, save/load, and training with imported samples.
 
 ## v2 Requirements
@@ -103,7 +103,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IMPORT-03 | Phase 1 | Complete |
 | IMPORT-04 | Phase 1 | Complete |
 | IMPORT-05 | Phase 1 | Complete |
-| UI-01 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Complete |
 | UI-02 | Phase 2 | Complete |
 | UI-03 | Phase 2 | Complete |
 | UI-04 | Phase 2 | Complete |
@@ -111,15 +111,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-06 | Phase 2 | Complete |
 | UI-07 | Phase 2 | Complete |
 | UI-08 | Phase 2 | Complete |
-| TRAIN-01 | Phase 3 | Pending |
-| TRAIN-02 | Phase 3 | Pending |
-| TRAIN-03 | Phase 3 | Pending |
-| TRAIN-04 | Phase 3 | Pending |
-| TRAIN-05 | Phase 3 | Pending |
+| TRAIN-01 | Phase 3 | Complete |
+| TRAIN-02 | Phase 3 | Complete |
+| TRAIN-03 | Phase 3 | Complete |
+| TRAIN-04 | Phase 3 | Complete |
+| TRAIN-05 | Phase 3 | Complete |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 1 | Complete |
 | TEST-03 | Phase 2 | Complete |
-| TEST-04 | Phase 3 | Pending |
+| TEST-04 | Phase 3 | Complete |
 | TEST-05 | Phase 4 | Pending |
 
 **Coverage:**
@@ -129,4 +129,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-07 after Phase 2 automated verification*
+*Last updated: 2026-05-07 after Phase 3 automated verification*

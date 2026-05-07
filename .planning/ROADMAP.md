@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: OpenVerse Client & Import Boundary** - The app can search OpenVerse and convert selected remote images into safe, bounded canvas samples.
 - [x] **Phase 2: Student Search UI** - Students can search and browse image-only OpenVerse results in a simple class-scoped interface.
-- [ ] **Phase 3: Training Workflow Integration** - OpenVerse imports enter the current image class as normal trainable samples without corrupting class state.
+- [x] **Phase 3: Training Workflow Integration** - OpenVerse imports enter the current image class as normal trainable samples without corrupting class state.
 - [ ] **Phase 4: Live Browser Validation** - Real OpenVerse searches, remote image imports, save/load, and training are validated in browser conditions.
 
 ## Phase Details
@@ -58,7 +58,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Existing sample deletion, movement, project save/load, and model training continue to work with OpenVerse-imported samples.
   4. Slow or stale searches/imports cannot add an image to the wrong class after class state changes.
   5. Other classes remain unchanged when a result is imported into the selected class.
-**Plans**: TBD
+**Plans**:
+- `03-01-PLAN.md` - Training Workflow Integration
 **UI hint**: yes
 
 ### Phase 4: Live Browser Validation
@@ -82,5 +83,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. OpenVerse Client & Import Boundary | 2/2 | Complete | 2026-05-06 |
 | 2. Student Search UI | 2/2 | Complete | 2026-05-07 |
-| 3. Training Workflow Integration | 0/TBD | Ready to plan | - |
-| 4. Live Browser Validation | 0/TBD | Not started | - |
+| 3. Training Workflow Integration | 1/1 | Complete | 2026-05-07 |
+| 4. Live Browser Validation | 0/TBD | Ready to plan | - |
