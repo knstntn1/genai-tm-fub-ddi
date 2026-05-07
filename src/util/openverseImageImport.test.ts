@@ -87,24 +87,26 @@ describe('importOpenVerseImage', () => {
 
     it('exports classroom-safe import defaults', ({ expect }) => {
         expect(DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS).toBe(10000);
-        expect(DEFAULT_OPENVERSE_IMPORT_MAX_SIZE).toBe(512);
+        expect(DEFAULT_OPENVERSE_IMPORT_MAX_SIZE).toBe(224);
     });
 
-    it('loads a remote image into a readable styled canvas with getImageData(0, 0, 1, 1)', async ({ expect }) => {
+    it('loads a remote image into a readable styled 224x224 training canvas with getImageData(0, 0, 1, 1)', async ({
+        expect,
+    }) => {
         imageBehaviors.push({ type: 'load', width: 200, height: 100 });
 
         const canvas = await importOpenVerseImage({ imageUrl: 'https://example.test/image.jpg' });
 
         expect(canvas).toBeInstanceOf(HTMLCanvasElement);
-        expect(canvas.width).toBe(200);
-        expect(canvas.height).toBe(100);
+        expect(canvas.width).toBe(224);
+        expect(canvas.height).toBe(224);
         expect(canvas.style.width).toBe('58px');
         expect(canvas.style.height).toBe('58px');
-        expect(drawImage).toHaveBeenCalledWith(expect.any(MockImage), 0, 0, 200, 100);
+        expect(drawImage).toHaveBeenCalledWith(expect.any(MockImage), 50, 0, 100, 100, 0, 0, 224, 224);
         expect(getImageData).toHaveBeenCalledWith(0, 0, 1, 1);
     });
 
-    it('bounds oversized images to maxSize while preserving aspect ratio', async ({ expect }) => {
+    it('uses maxSize as the square training canvas target size', async ({ expect }) => {
         imageBehaviors.push({ type: 'load', width: 1600, height: 800 });
 
         const canvas = await importOpenVerseImage({
@@ -112,9 +114,9 @@ describe('importOpenVerseImage', () => {
             maxSize: 400,
         });
 
-        expect(Math.max(canvas.width, canvas.height)).toBe(400);
         expect(canvas.width).toBe(400);
-        expect(canvas.height).toBe(200);
+        expect(canvas.height).toBe(400);
+        expect(drawImage).toHaveBeenCalledWith(expect.any(MockImage), 400, 0, 800, 800, 0, 0, 400, 400);
         expect(getImageData).toHaveBeenCalledWith(0, 0, 1, 1);
     });
 
@@ -127,8 +129,9 @@ describe('importOpenVerseImage', () => {
         });
 
         expect(loadedUrls).toEqual(['https://example.test/primary.jpg', 'https://example.test/thumb.jpg']);
-        expect(canvas.width).toBe(80);
-        expect(canvas.height).toBe(120);
+        expect(canvas.width).toBe(224);
+        expect(canvas.height).toBe(224);
+        expect(drawImage).toHaveBeenCalledWith(expect.any(MockImage), 0, 20, 80, 80, 0, 0, 224, 224);
     });
 
     it('uses typed import errors', ({ expect }) => {

@@ -1,5 +1,5 @@
 export const DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS = 10000;
-export const DEFAULT_OPENVERSE_IMPORT_MAX_SIZE = 512;
+export const DEFAULT_OPENVERSE_IMPORT_MAX_SIZE = 224;
 
 export interface ImportOpenVerseImageOptions {
     imageUrl: string;
@@ -56,7 +56,7 @@ function assertSupportedImageUrl(url: string): string {
     return trimmedUrl;
 }
 
-function getBoundedDimensions(image: HTMLImageElement, maxSize: number): { width: number; height: number } {
+function getSourceDimensions(image: HTMLImageElement): { width: number; height: number } {
     const sourceWidth = image.naturalWidth || image.width;
     const sourceHeight = image.naturalHeight || image.height;
 
@@ -64,12 +64,33 @@ function getBoundedDimensions(image: HTMLImageElement, maxSize: number): { width
         throw toImportError('unsupported-image', image.currentSrc || image.src);
     }
 
-    const safeMaxSize = maxSize > 0 ? maxSize : DEFAULT_OPENVERSE_IMPORT_MAX_SIZE;
-    const ratio = Math.min(1, safeMaxSize / Math.max(sourceWidth, sourceHeight));
-
     return {
-        width: Math.max(1, Math.round(sourceWidth * ratio)),
-        height: Math.max(1, Math.round(sourceHeight * ratio)),
+        width: sourceWidth,
+        height: sourceHeight,
+    };
+}
+
+function getCoverCrop(
+    source: { width: number; height: number }
+): { sx: number; sy: number; sw: number; sh: number } {
+    const sourceAspect = source.width / source.height;
+
+    if (sourceAspect > 1) {
+        const sw = source.height;
+        return {
+            sx: Math.max(0, Math.round((source.width - sw) / 2)),
+            sy: 0,
+            sw,
+            sh: source.height,
+        };
+    }
+
+    const sh = source.width;
+    return {
+        sx: 0,
+        sy: Math.max(0, Math.round((source.height - sh) / 2)),
+        sw: source.width,
+        sh,
     };
 }
 
@@ -132,10 +153,12 @@ async function loadImage(
 
 function canvasFromImage(image: HTMLImageElement, maxSize: number): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
-    const dimensions = getBoundedDimensions(image, maxSize);
+    const sourceDimensions = getSourceDimensions(image);
+    const targetSize = maxSize > 0 ? maxSize : DEFAULT_OPENVERSE_IMPORT_MAX_SIZE;
+    const crop = getCoverCrop(sourceDimensions);
 
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    canvas.width = targetSize;
+    canvas.height = targetSize;
 
     const context = canvas.getContext('2d');
     if (!context) {
@@ -143,7 +166,7 @@ function canvasFromImage(image: HTMLImageElement, maxSize: number): HTMLCanvasEl
     }
 
     try {
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        context.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, canvas.width, canvas.height);
         context.getImageData(0, 0, 1, 1);
     } catch {
         throw toImportError('canvas-unreadable', image.currentSrc || image.src);
