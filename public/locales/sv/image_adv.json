@@ -71,7 +71,8 @@
             "record": "Spela in",
             "collaborate": "Samarbeta",
             "use": "Använd ({{count}})",
-            "displayMore": "Visa {{count}} bilder"
+            "displayMore": "Visa {{count}} bilder",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Träningsdata",

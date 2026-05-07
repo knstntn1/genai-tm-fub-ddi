@@ -71,7 +71,8 @@
             "record": "録音",
             "collaborate": "共同作業",
             "use": "使用 ({{count}})",
-            "displayMore": "{{count}}枚の画像を表示"
+            "displayMore": "{{count}}枚の画像を表示",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "トレーニングデータ",

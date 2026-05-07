@@ -71,7 +71,8 @@
             "record": "Kaydet",
             "collaborate": "İş Birliği Yap",
             "use": "Kullan ({{count}})",
-            "displayMore": "{{count}} resmi göster"
+            "displayMore": "{{count}} resmi göster",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Eğitim Verisi",

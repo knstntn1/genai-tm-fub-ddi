@@ -71,7 +71,8 @@
             "record": "Записати",
             "collaborate": "Співпрацювати",
             "use": "Використати ({{count}})",
-            "displayMore": "Показати {{count}} зображень"
+            "displayMore": "Показати {{count}} зображень",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Тренувальний набір даних",

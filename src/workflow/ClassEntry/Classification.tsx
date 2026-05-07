@@ -7,6 +7,7 @@ import WebcamCapture from './WebcamCapture';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import WarningIcon from '@mui/icons-material/Warning';
 import ClassMenu from './ClassMenu';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ import DatasetPicker from '@genaitm/components/DatasetPicker/DatasetPicker';
 import AudioExampleRecorder from '@genaitm/components/AudioExampleRecorder/AudioExampleRecorder';
 import { AudioExample } from '@genai-fi/classifier';
 import { validateAudioBlob } from '@genaitm/util/audio';
+import OpenVerseSearchDialog from '../OpenVerseSearch/OpenVerseSearchDialog';
 
 const SAMPLEMIN_DEFAULT = 2;
 const SAMPLEMIN_AUDIO_NOISE = 20;
@@ -56,6 +58,7 @@ export function Classification({
     const [showTip, setShowTip] = useState(false);
     const [showDropError, setShowDropError] = useState(false);
     const [showDatasetPicker, setShowDatasetPicker] = useState(false);
+    const [showOpenVerseSearch, setShowOpenVerseSearch] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const fatal = useAtomValue(fatalWebcam);
 
@@ -272,6 +275,10 @@ export function Classification({
 
     const doDatasetPickerClose = useCallback(() => setShowDatasetPicker(false), [setShowDatasetPicker]);
 
+    const doOpenVerseClick = useCallback(() => setShowOpenVerseSearch(true), [setShowOpenVerseSearch]);
+
+    const doOpenVerseClose = useCallback(() => setShowOpenVerseSearch(false), [setShowOpenVerseSearch]);
+
     const handleSampleClick = useCallback(
         (ix: number) => {
             if (onSampleClick) {
@@ -426,6 +433,21 @@ export function Classification({
                                     </VerticalButton>
                                 </li>
                             )}
+                            {!isAudio && (
+                                <li
+                                    className={style.sample}
+                                    style={{ display: !active ? undefined : 'none' }}
+                                >
+                                    <VerticalButton
+                                        data-testid="openversebutton"
+                                        variant="outlined"
+                                        startIcon={<ImageSearchIcon />}
+                                        onClick={doOpenVerseClick}
+                                    >
+                                        {t('trainingdata.actions.openverse')}
+                                    </VerticalButton>
+                                </li>
+                            )}
                             {data.samples.length === 0 && !active && !dropProps.hovered && !loading && (
                                 <li>
                                     <div className={doAnimation ? style.dropSuggestAnimated : style.dropSuggest}>
@@ -466,6 +488,12 @@ export function Classification({
                 open={showDatasetPicker}
                 onClose={doDatasetPickerClose}
                 onDatasetSelected={doDatasetSelected}
+            />
+            <OpenVerseSearchDialog
+                open={showOpenVerseSearch}
+                className={name}
+                onClose={doOpenVerseClose}
+                onUseImage={() => {}}
             />
         </Widget>
     );

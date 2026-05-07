@@ -24,6 +24,10 @@ const germanOpenVerse = {
     fallbackAlt: "OpenVerse Bild",
 };
 
+const germanActions = {
+    openverse: "Bildsuche",
+};
+
 const englishFallbackOpenVerse = {
     title: "OpenVerse: {{className}}",
     searchLabel: "Search term",
@@ -42,6 +46,10 @@ const englishFallbackOpenVerse = {
     more: "More results",
     failedUse: "This image could not be used. Please try again.",
     fallbackAlt: "OpenVerse image",
+};
+
+const englishFallbackActions = {
+    openverse: "Image search",
 };
 
 function getLocaleFiles() {
@@ -63,6 +71,9 @@ function formatJson(json) {
 function nextContentFor(locale, file) {
     const current = JSON.parse(fs.readFileSync(file, "utf8"));
     current.trainingdata = current.trainingdata || {};
+    current.trainingdata.actions = current.trainingdata.actions || {};
+    current.trainingdata.actions.openverse =
+        locale === "de-DE" ? germanActions.openverse : englishFallbackActions.openverse;
     current.trainingdata.openverse =
         locale === "de-DE" ? germanOpenVerse : englishFallbackOpenVerse;
     return formatJson(current);

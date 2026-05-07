@@ -71,7 +71,8 @@
             "record": "녹음",
             "collaborate": "협업업",
             "use": "사용 ({{count}})",
-            "displayMore": "{{count}}개 이미지 표시"
+            "displayMore": "{{count}}개 이미지 표시",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "데이터 학습시키기",

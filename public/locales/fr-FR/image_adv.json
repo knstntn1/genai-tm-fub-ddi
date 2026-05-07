@@ -71,7 +71,8 @@
             "collaborate": "Collaborer",
             "cancel": "Annuler",
             "use": "Utiliser ({{count}})",
-            "displayMore": "Afficher {{count}} images"
+            "displayMore": "Afficher {{count}} images",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Données d'entraînements",

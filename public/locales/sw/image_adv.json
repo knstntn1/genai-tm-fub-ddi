@@ -71,7 +71,8 @@
             "record": "Rekodi",
             "collaborate": "Shirikiana",
             "use": "Tumia ({{count}})",
-            "displayMore": "Onyesha picha {{count}}"
+            "displayMore": "Onyesha picha {{count}}",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Takwimu za Mafunzo",

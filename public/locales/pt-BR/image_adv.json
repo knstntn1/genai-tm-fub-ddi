@@ -71,7 +71,8 @@
             "record": "Gravar",
             "collaborate": "Colaborar",
             "use": "Usar ({{count}})",
-            "displayMore": "Exibir {{count}} imagens"
+            "displayMore": "Exibir {{count}} imagens",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Dados de Treinamento",

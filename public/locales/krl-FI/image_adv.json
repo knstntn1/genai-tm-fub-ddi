@@ -71,7 +71,8 @@
             "record": "Nauhoita",
             "collaborate": "Rua yhtes",
             "use": "Käytä ({{count}})",
-            "displayMore": "Näytä {{count}} kuvua"
+            "displayMore": "Näytä {{count}} kuvua",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Opastusdata",

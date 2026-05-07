@@ -71,7 +71,8 @@
             "collaborate": "Tee yhteistyötä",
             "cancel": "Peruuta",
             "use": "Käytä ({{count}})",
-            "displayMore": "Näytä {{count}} kuvaa"
+            "displayMore": "Näytä {{count}} kuvaa",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Opetusdata",

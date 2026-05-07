@@ -71,7 +71,8 @@
             "collaborate": "Zusammenarbeiten",
             "cancel": "Abbrechen",
             "use": "Verwenden ({{count}})",
-            "displayMore": "{{count}} Bilder anzeigen"
+            "displayMore": "{{count}} Bilder anzeigen",
+            "openverse": "Bildsuche"
         },
         "labels": {
             "title": "Trainingsdaten",

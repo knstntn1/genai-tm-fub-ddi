@@ -71,7 +71,8 @@
             "record": "පටිගත කරන්න",
             "collaborate": "සහාය දක්වන්න",
             "use": "භාවිතා කරන්න ({{count}})",
-            "displayMore": "පින්තූර {{count}} ක් පෙන්වන්න"
+            "displayMore": "පින්තූර {{count}} ක් පෙන්වන්න",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "පුහුණු දත්ත",

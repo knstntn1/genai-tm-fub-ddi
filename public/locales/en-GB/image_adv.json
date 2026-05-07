@@ -72,7 +72,8 @@
             "collaborate": "Collaborate",
             "cancel": "Cancel",
             "use": "Use ({{count}})",
-            "displayMore": "Display {{count}} images"
+            "displayMore": "Display {{count}} images",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Training Data",

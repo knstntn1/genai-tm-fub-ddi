@@ -71,7 +71,8 @@
             "record": "Registra",
             "collaborate": "Collabora",
             "use": "Usa ({{count}})",
-            "displayMore": "Mostra {{count}} immagini"
+            "displayMore": "Mostra {{count}} immagini",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Dati di Addestramento",

@@ -71,7 +71,8 @@
             "record": "Записать",
             "collaborate": "Совместная работа",
             "use": "Использовать ({{count}})",
-            "displayMore": "Показать {{count}} изображений"
+            "displayMore": "Показать {{count}} изображений",
+            "openverse": "Image search"
         },
         "labels": {
             "title": "Набор данных для обучения",
