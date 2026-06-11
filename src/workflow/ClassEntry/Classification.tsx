@@ -23,9 +23,9 @@ import DatasetPicker from '@genaitm/components/DatasetPicker/DatasetPicker';
 import AudioExampleRecorder from '@genaitm/components/AudioExampleRecorder/AudioExampleRecorder';
 import { AudioExample } from '@genai-fi/classifier';
 import { validateAudioBlob } from '@genaitm/util/audio';
-import OpenVerseSearchDialog from '../OpenVerseSearch/OpenVerseSearchDialog';
-import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
-import type { OpenVerseImageResult } from '@genaitm/util/openverse';
+import ImageSearchDialog from '../ImageSearch/ImageSearchDialog';
+import { importRemoteImage } from '@genaitm/util/remoteImageImport';
+import type { ImageSearchResult } from '@genaitm/util/imageSearch';
 
 const SAMPLEMIN_DEFAULT = 2;
 const SAMPLEMIN_AUDIO_NOISE = 20;
@@ -58,12 +58,12 @@ export function Classification({
     const fileRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLOListElement>(null);
     const classLabelRef = useRef(data.label);
-    const openVerseImportRef = useRef<{ id: number; controller: AbortController | null }>({ id: 0, controller: null });
+    const imageSearchImportRef = useRef<{ id: number; controller: AbortController | null }>({ id: 0, controller: null });
     const [loading, setLoading] = useState(false);
     const [showTip, setShowTip] = useState(false);
     const [showDropError, setShowDropError] = useState(false);
     const [showDatasetPicker, setShowDatasetPicker] = useState(false);
-    const [showOpenVerseSearch, setShowOpenVerseSearch] = useState(false);
+    const [showImageSearch, setShowImageSearch] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const fatal = useAtomValue(fatalWebcam);
 
@@ -81,7 +81,7 @@ export function Classification({
 
     useEffect(() => {
         return () => {
-            openVerseImportRef.current.controller?.abort();
+            imageSearchImportRef.current.controller?.abort();
         };
     }, []);
 
@@ -290,20 +290,20 @@ export function Classification({
 
     const doDatasetPickerClose = useCallback(() => setShowDatasetPicker(false), [setShowDatasetPicker]);
 
-    const doOpenVerseClick = useCallback(() => setShowOpenVerseSearch(true), [setShowOpenVerseSearch]);
+    const doImageSearchClick = useCallback(() => setShowImageSearch(true), [setShowImageSearch]);
 
-    const doOpenVerseClose = useCallback(() => setShowOpenVerseSearch(false), [setShowOpenVerseSearch]);
+    const doImageSearchClose = useCallback(() => setShowImageSearch(false), [setShowImageSearch]);
 
-    const handleUseOpenVerseImage = useCallback(
-        async (result: OpenVerseImageResult) => {
+    const handleUseImageSearchResult = useCallback(
+        async (result: ImageSearchResult) => {
             const targetLabel = data.label;
             const targetData = data;
-            openVerseImportRef.current.controller?.abort();
+            imageSearchImportRef.current.controller?.abort();
             const controller = new AbortController();
-            const importId = openVerseImportRef.current.id + 1;
-            openVerseImportRef.current = { id: importId, controller };
+            const importId = imageSearchImportRef.current.id + 1;
+            imageSearchImportRef.current = { id: importId, controller };
 
-            const canvas = await importOpenVerseImage({
+            const canvas = await importRemoteImage({
                 imageUrl: result.imageUrl,
                 fallbackUrl: result.thumbnailUrl,
                 signal: controller.signal,
@@ -311,10 +311,10 @@ export function Classification({
 
             if (
                 controller.signal.aborted ||
-                openVerseImportRef.current.id !== importId ||
+                imageSearchImportRef.current.id !== importId ||
                 classLabelRef.current !== targetLabel
             ) {
-                throw new Error('stale-openverse-import-target');
+                throw new Error('stale-image-search-import-target');
             }
 
             canvas.style.width = '58px';
@@ -329,10 +329,10 @@ export function Classification({
                 targetData
             );
             if (inserted === false) {
-                throw new Error('stale-openverse-import-target');
+                throw new Error('stale-image-search-import-target');
             }
-            openVerseImportRef.current.controller = null;
-            setShowOpenVerseSearch(false);
+            imageSearchImportRef.current.controller = null;
+            setShowImageSearch(false);
         },
         [data, index, setData]
     );
@@ -518,12 +518,12 @@ export function Classification({
                                     style={{ display: !active ? undefined : 'none' }}
                                 >
                                     <VerticalButton
-                                        data-testid="openversebutton"
+                                        data-testid="image-search-button"
                                         variant="outlined"
                                         startIcon={<ImageSearchIcon />}
-                                        onClick={doOpenVerseClick}
+                                        onClick={doImageSearchClick}
                                     >
-                                        {t('trainingdata.actions.openverse')}
+                                        {t('trainingdata.actions.imageSearch')}
                                     </VerticalButton>
                                 </li>
                             )}
@@ -568,11 +568,11 @@ export function Classification({
                 onClose={doDatasetPickerClose}
                 onDatasetSelected={doDatasetSelected}
             />
-            <OpenVerseSearchDialog
-                open={showOpenVerseSearch}
+            <ImageSearchDialog
+                open={showImageSearch}
                 className={name}
-                onClose={doOpenVerseClose}
-                onUseImage={handleUseOpenVerseImage}
+                onClose={doImageSearchClose}
+                onUseImage={handleUseImageSearchResult}
             />
         </Widget>
     );

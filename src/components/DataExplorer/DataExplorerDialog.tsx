@@ -25,12 +25,12 @@ import {
     removeProjectDatasetImage,
     updateProjectDatasetImageSplit,
 } from '@genaitm/util/projectDatasets';
-import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
-import type { OpenVerseImageResult } from '@genaitm/util/openverse';
+import { importRemoteImage } from '@genaitm/util/remoteImageImport';
+import type { ImageSearchResult } from '@genaitm/util/imageSearch';
 import { useVariant } from '@genaitm/util/variant';
 import { DATASETS, Dataset, fetchAndCacheDatasets } from '@genaitm/util/datasets';
 import WebcamCapture from '@genaitm/workflow/ClassEntry/WebcamCapture';
-import OpenVerseSearchDialog from '@genaitm/workflow/OpenVerseSearch/OpenVerseSearchDialog';
+import ImageSearchDialog from '@genaitm/workflow/ImageSearch/ImageSearchDialog';
 import DatasetCategory from '@genaitm/components/DatasetPicker/DatasetCategory';
 import styles from './DataExplorerDialog.module.css';
 
@@ -53,7 +53,7 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     const [newName, setNewName] = useState('');
     const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
     const [showWebcam, setShowWebcam] = useState(false);
-    const [showOpenVerse, setShowOpenVerse] = useState(false);
+    const [showImageSearch, setShowImageSearch] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [remoteDatasets, setRemoteDatasets] = useState<Dataset[]>(DATASETS);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,7 +99,7 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     }, [onChanged, selectedId, setDatasets]);
 
     const addCanvasesToSelected = useCallback(
-        (canvases: HTMLCanvasElement[], source: 'upload' | 'webcam' | 'openverse') => {
+        (canvases: HTMLCanvasElement[], source: 'upload' | 'webcam' | 'wikimedia') => {
             if (!selectedId || canvases.length === 0) return false;
 
             const images = canvases.map((canvas) => createProjectDatasetImage(prepareCanvas(canvas), 'training', source));
@@ -144,12 +144,12 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
         [addCanvasesToSelected]
     );
 
-    const handleUseOpenVerseImage = useCallback(
-        async (result: OpenVerseImageResult) => {
+    const handleUseImageSearchResult = useCallback(
+        async (result: ImageSearchResult) => {
             const targetId = selectedId;
             if (!targetId) throw new Error('no-dataset-selected');
 
-            const canvas = await importOpenVerseImage({
+            const canvas = await importRemoteImage({
                 imageUrl: result.imageUrl,
                 fallbackUrl: result.thumbnailUrl,
             });
@@ -161,13 +161,13 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                     inserted = true;
                     return {
                         ...dataset,
-                        images: [createProjectDatasetImage(prepareCanvas(canvas), 'training', 'openverse'), ...dataset.images],
+                        images: [createProjectDatasetImage(prepareCanvas(canvas), 'training', 'wikimedia'), ...dataset.images],
                     };
                 })
             );
             if (!inserted) throw new Error('dataset-missing');
             onChanged?.();
-            setShowOpenVerse(false);
+            setShowImageSearch(false);
         },
         [onChanged, selectedId, setDatasets]
     );
@@ -193,7 +193,7 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     const handleClose = useCallback(() => {
         setError(null);
         setShowWebcam(false);
-        setShowOpenVerse(false);
+        setShowImageSearch(false);
         onClose();
     }, [onClose]);
 
@@ -301,9 +301,9 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                         <Button
                                             variant="outlined"
                                             startIcon={<ImageSearchIcon />}
-                                            onClick={() => setShowOpenVerse(true)}
+                                            onClick={() => setShowImageSearch(true)}
                                         >
-                                            {t('trainingdata.actions.openverse')}
+                                            {t('trainingdata.actions.imageSearch')}
                                         </Button>
                                         <Button
                                             variant="outlined"
@@ -400,11 +400,11 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                 onCapture={handleCapture}
                 onClose={() => setShowWebcam(false)}
             />
-            <OpenVerseSearchDialog
-                open={open && showOpenVerse}
+            <ImageSearchDialog
+                open={open && showImageSearch}
                 className={selectedDataset?.name ?? 'Dataset'}
-                onClose={() => setShowOpenVerse(false)}
-                onUseImage={handleUseOpenVerseImage}
+                onClose={() => setShowImageSearch(false)}
+                onUseImage={handleUseImageSearchResult}
             />
         </>
     );

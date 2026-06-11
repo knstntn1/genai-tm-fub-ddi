@@ -16,7 +16,7 @@ export interface IClassification {
 
 export type DatasetSplit = 'training' | 'test';
 
-export type ProjectDatasetImageSource = 'upload' | 'webcam' | 'openverse';
+export type ProjectDatasetImageSource = 'upload' | 'webcam' | 'openverse' | 'wikimedia';
 
 export interface ProjectDatasetImage {
     id: string;

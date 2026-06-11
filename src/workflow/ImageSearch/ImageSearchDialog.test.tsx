@@ -3,40 +3,40 @@ import { resolve } from 'node:path';
 import { describe, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import OpenVerseSearchDialog from './OpenVerseSearchDialog';
-import { OpenVerseSearchError, type OpenVerseImageResult, type OpenVerseImageSearchResult } from '@genaitm/util/openverse';
+import ImageSearchDialog from './ImageSearchDialog';
+import { ImageSearchError, type ImageSearchResult, type ImageSearchResponse } from '@genaitm/util/imageSearch';
 
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key: string, values?: Record<string, string>) => {
             const copy: Record<string, string> = {
-                'trainingdata.openverse.title': `OpenVerse: ${values?.className ?? ''}`,
-                'trainingdata.openverse.searchLabel': 'Suchbegriff',
-                'trainingdata.openverse.searchPlaceholder': 'z. B. Katze',
-                'trainingdata.openverse.searchAction': 'Bilder suchen',
-                'trainingdata.openverse.useImage': 'Dieses Bild nutzen',
-                'trainingdata.openverse.loading': 'Suche Bilder...',
-                'trainingdata.openverse.loadingMore': 'Weitere Bilder werden geladen...',
-                'trainingdata.openverse.initial': 'Suche nach Bildern für diese Klasse.',
-                'trainingdata.openverse.emptyTitle': 'Keine Bilder gefunden.',
-                'trainingdata.openverse.emptyBody': 'Versuche einen anderen Suchbegriff.',
-                'trainingdata.openverse.retryableError': 'Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.',
-                'trainingdata.openverse.rateLimit':
+                'trainingdata.imageSearch.title': `Wikimedia Commons: ${values?.className ?? ''}`,
+                'trainingdata.imageSearch.searchLabel': 'Suchbegriff',
+                'trainingdata.imageSearch.searchPlaceholder': 'z. B. Katze',
+                'trainingdata.imageSearch.searchAction': 'Bilder suchen',
+                'trainingdata.imageSearch.useImage': 'Dieses Bild nutzen',
+                'trainingdata.imageSearch.loading': 'Suche Bilder...',
+                'trainingdata.imageSearch.loadingMore': 'Weitere Bilder werden geladen...',
+                'trainingdata.imageSearch.initial': 'Suche nach Bildern für diese Klasse.',
+                'trainingdata.imageSearch.emptyTitle': 'Keine Bilder gefunden.',
+                'trainingdata.imageSearch.emptyBody': 'Versuche einen anderen Suchbegriff.',
+                'trainingdata.imageSearch.retryableError': 'Die Bildsuche hat nicht geklappt. Bitte erneut versuchen.',
+                'trainingdata.imageSearch.rateLimit':
                     'Gerade sind zu viele Suchanfragen aktiv. Versuche es gleich noch einmal.',
-                'trainingdata.openverse.retry': 'Erneut versuchen',
-                'trainingdata.openverse.more': 'Mehr Ergebnisse',
-                'trainingdata.openverse.pendingUse': 'Bild wird hinzugefügt...',
-                'trainingdata.openverse.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
-                'trainingdata.openverse.emptyQuery': 'Gib zuerst einen Suchbegriff ein.',
+                'trainingdata.imageSearch.retry': 'Erneut versuchen',
+                'trainingdata.imageSearch.more': 'Mehr Ergebnisse',
+                'trainingdata.imageSearch.pendingUse': 'Bild wird hinzugefügt...',
+                'trainingdata.imageSearch.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
+                'trainingdata.imageSearch.emptyQuery': 'Gib zuerst einen Suchbegriff ein.',
                 'trainingdata.aria.close': 'Schließen',
-                'trainingdata.openverse.fallbackAlt': 'OpenVerse Bild',
+                'trainingdata.imageSearch.fallbackAlt': 'Bild aus Wikimedia Commons',
             };
             return copy[key] ?? key;
         },
     }),
 }));
 
-const catResult: OpenVerseImageResult = {
+const catResult: ImageSearchResult = {
     id: 'cat-1',
     title: 'Visible Cat Metadata',
     imageUrl: 'https://example.com/cat-full.jpg',
@@ -48,17 +48,16 @@ const catResult: OpenVerseImageResult = {
     license: 'Metadata License',
     licenseUrl: 'https://example.com/license',
     creator: 'Metadata Creator',
-    mature: false,
 };
 
-const dogResult: OpenVerseImageResult = {
+const dogResult: ImageSearchResult = {
     id: 'dog-1',
     title: 'Dog Metadata',
     imageUrl: 'https://example.com/dog-full.jpg',
     thumbnailUrl: 'https://example.com/dog-thumb.jpg',
 };
 
-function searchResponse(results: OpenVerseImageResult[], page = 1, pageCount = 1): OpenVerseImageSearchResult {
+function searchResponse(results: ImageSearchResult[], page = 1, pageCount = 1): ImageSearchResponse {
     return {
         results,
         page,
@@ -69,11 +68,11 @@ function searchResponse(results: OpenVerseImageResult[], page = 1, pageCount = 1
 }
 
 function renderDialog(
-    searchClient = vi.fn<() => Promise<OpenVerseImageSearchResult>>(),
+    searchClient = vi.fn<() => Promise<ImageSearchResponse>>(),
     onUseImage = vi.fn()
 ) {
     return render(
-        <OpenVerseSearchDialog
+        <ImageSearchDialog
             open={true}
             className="Klasse 1"
             onClose={() => {}}
@@ -83,11 +82,11 @@ function renderDialog(
     );
 }
 
-describe('OpenVerseSearchDialog', () => {
+describe('ImageSearchDialog', () => {
     it('shows the current class in the dialog title', ({ expect }) => {
         renderDialog();
 
-        expect(screen.getByRole('heading', { name: 'OpenVerse: Klasse 1' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Wikimedia Commons: Klasse 1' })).toBeInTheDocument();
     });
 
     it('submits only through the button or Enter and blocks whitespace queries', async ({ expect }) => {
@@ -128,9 +127,9 @@ describe('OpenVerseSearchDialog', () => {
 
     it('renders loading, empty, retryable error, and rate-limit states', async ({ expect }) => {
         const user = userEvent.setup();
-        const pendingClient = vi.fn(() => new Promise<OpenVerseImageSearchResult>(() => {}));
+        const pendingClient = vi.fn(() => new Promise<ImageSearchResponse>(() => {}));
         const pendingRender = render(
-            <OpenVerseSearchDialog
+            <ImageSearchDialog
                 open={true}
                 className="Klasse 1"
                 onClose={() => {}}
@@ -149,7 +148,7 @@ describe('OpenVerseSearchDialog', () => {
 
         const emptyClient = vi.fn().mockResolvedValue(searchResponse([]));
         const emptyRender = render(
-            <OpenVerseSearchDialog
+            <ImageSearchDialog
                 open={true}
                 className="Klasse 1"
                 onClose={() => {}}
@@ -166,9 +165,9 @@ describe('OpenVerseSearchDialog', () => {
 
         emptyRender.unmount();
 
-        const retryClient = vi.fn().mockRejectedValue(new OpenVerseSearchError('network', 'failed'));
+        const retryClient = vi.fn().mockRejectedValue(new ImageSearchError('network', 'failed'));
         const retryRender = render(
-            <OpenVerseSearchDialog
+            <ImageSearchDialog
                 open={true}
                 className="Klasse 1"
                 onClose={() => {}}
@@ -185,9 +184,9 @@ describe('OpenVerseSearchDialog', () => {
 
         retryRender.unmount();
 
-        const rateLimitClient = vi.fn().mockRejectedValue(new OpenVerseSearchError('rate-limited', 'slow down'));
+        const rateLimitClient = vi.fn().mockRejectedValue(new ImageSearchError('rate-limited', 'slow down'));
         render(
-            <OpenVerseSearchDialog
+            <ImageSearchDialog
                 open={true}
                 className="Klasse 1"
                 onClose={() => {}}
@@ -294,7 +293,7 @@ describe('OpenVerseSearchDialog', () => {
         const searchClient = vi
             .fn()
             .mockResolvedValueOnce(searchResponse([catResult], 1, 1))
-            .mockRejectedValueOnce(new OpenVerseSearchError('network', 'failed'))
+            .mockRejectedValueOnce(new ImageSearchError('network', 'failed'))
             .mockResolvedValueOnce(searchResponse([dogResult], 1, 1));
         renderDialog(searchClient);
 
@@ -322,7 +321,7 @@ describe('OpenVerseSearchDialog', () => {
         const searchClient = vi
             .fn()
             .mockResolvedValueOnce(searchResponse([catResult], 1, 2))
-            .mockRejectedValueOnce(new OpenVerseSearchError('http', 'failed'))
+            .mockRejectedValueOnce(new ImageSearchError('http', 'failed'))
             .mockResolvedValueOnce(searchResponse([dogResult], 2, 2));
         renderDialog(searchClient);
 
@@ -349,7 +348,7 @@ describe('OpenVerseSearchDialog', () => {
         const searchClient = vi
             .fn()
             .mockResolvedValueOnce(searchResponse([catResult], 1, 2))
-            .mockImplementationOnce(() => new Promise<OpenVerseImageSearchResult>(() => {}));
+            .mockImplementationOnce(() => new Promise<ImageSearchResponse>(() => {}));
         renderDialog(searchClient);
 
         await user.type(screen.getByLabelText('Suchbegriff'), 'tier');
@@ -375,13 +374,13 @@ describe('OpenVerseSearchDialog', () => {
             await screen.findByText('Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.')
         ).toBeInTheDocument();
 
-        const source = readFileSync(resolve('src/workflow/OpenVerseSearch/OpenVerseSearchDialog.tsx'), 'utf8');
+        const source = readFileSync(resolve('src/workflow/ImageSearch/ImageSearchDialog.tsx'), 'utf8');
         const forbiddenTerms = [
             '@genaitm/' + 'state',
             'class' + 'State',
             'set' + 'Data',
-            'import' + 'OpenVerseImage',
-            'openverse' + 'ImageImport',
+            'import' + 'RemoteImage',
+            'remote' + 'ImageImport',
             'samples' + ':',
         ];
 

@@ -72,7 +72,7 @@
             "cancel": "Abbrechen",
             "use": "Verwenden ({{count}})",
             "displayMore": "{{count}} Bilder anzeigen",
-            "openverse": "Bildsuche"
+            "imageSearch": "Bildsuche"
         },
         "labels": {
             "title": "Trainingsdaten",
@@ -108,8 +108,8 @@
             "close": "Schließen",
             "classCard": "Trainingsdaten für {{name}}"
         },
-        "openverse": {
-            "title": "OpenVerse: {{className}}",
+        "imageSearch": {
+            "title": "Wikimedia Commons: {{className}}",
             "searchLabel": "Suchbegriff",
             "searchPlaceholder": "z. B. Katze",
             "searchAction": "Bilder suchen",
@@ -126,7 +126,7 @@
             "more": "Mehr Ergebnisse",
             "pendingUse": "Bild wird hinzugefügt...",
             "failedUse": "Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.",
-            "fallbackAlt": "OpenVerse Bild"
+            "fallbackAlt": "Bild aus Wikimedia Commons"
         }
     },
     "heatmap": {

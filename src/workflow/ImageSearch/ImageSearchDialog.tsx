@@ -12,15 +12,15 @@ import { Button } from '@genaitm/components/button/Button';
 import { useVariant } from '@genaitm/util/variant';
 import { useTranslation } from 'react-i18next';
 import {
-    OpenVerseSearchError,
-    searchOpenVerseImages,
-    type OpenVerseImageResult,
-    type OpenVerseImageSearchResult,
-    type SearchOpenVerseImagesOptions,
-} from '@genaitm/util/openverse';
-import styles from './OpenVerseSearchDialog.module.css';
+    ImageSearchError,
+    type ImageSearchOptions,
+    type ImageSearchResponse,
+    type ImageSearchResult,
+} from '@genaitm/util/imageSearch';
+import { searchWikimediaCommonsImages } from '@genaitm/util/wikimediaCommons';
+import styles from './ImageSearchDialog.module.css';
 
-type SearchClient = (options: SearchOpenVerseImagesOptions) => Promise<OpenVerseImageSearchResult>;
+type SearchClient = (options: ImageSearchOptions) => Promise<ImageSearchResponse>;
 
 type SearchStatus = 'idle' | 'loading' | 'loading-more' | 'results' | 'empty' | 'error' | 'rate-limited';
 
@@ -33,22 +33,22 @@ interface Props {
     open: boolean;
     className: string;
     onClose: () => void;
-    onUseImage: (result: OpenVerseImageResult) => void | Promise<void>;
+    onUseImage: (result: ImageSearchResult) => void | Promise<void>;
     searchClient?: SearchClient;
 }
 
-export default function OpenVerseSearchDialog({
+export default function ImageSearchDialog({
     open,
     className,
     onClose,
     onUseImage,
-    searchClient = searchOpenVerseImages,
+    searchClient = searchWikimediaCommonsImages,
 }: Props) {
     const { namespace } = useVariant();
     const { t } = useTranslation(namespace);
     const [query, setQuery] = useState('');
     const [submittedQuery, setSubmittedQuery] = useState('');
-    const [results, setResults] = useState<OpenVerseImageResult[]>([]);
+    const [results, setResults] = useState<ImageSearchResult[]>([]);
     const [page, setPage] = useState(0);
     const [pageCount, setPageCount] = useState(0);
     const [status, setStatus] = useState<SearchStatus>('idle');
@@ -100,14 +100,14 @@ export default function OpenVerseSearchDialog({
             } catch (error) {
                 if (controller.signal.aborted || currentRequestId !== requestId.current) return;
 
-                if (error instanceof OpenVerseSearchError && error.code === 'empty-query') {
+                if (error instanceof ImageSearchError && error.code === 'empty-query') {
                     setShowEmptyQuery(true);
                     setRetryRequest(null);
                     setStatus(results.length > 0 ? 'results' : 'idle');
                     return;
                 }
 
-                setStatus(error instanceof OpenVerseSearchError && error.code === 'rate-limited' ? 'rate-limited' : 'error');
+                setStatus(error instanceof ImageSearchError && error.code === 'rate-limited' ? 'rate-limited' : 'error');
             }
         },
         [abortActiveSearch, results.length, searchClient]
@@ -160,7 +160,7 @@ export default function OpenVerseSearchDialog({
     }, [abortActiveSearch, onClose]);
 
     const handleUseImage = useCallback(
-        async (result: OpenVerseImageResult) => {
+        async (result: ImageSearchResult) => {
             if (pendingUseIds.has(result.id)) return;
 
             setPendingUseIds((current) => new Set(current).add(result.id));
@@ -194,7 +194,7 @@ export default function OpenVerseSearchDialog({
             slotProps={{ paper: { className: styles.dialogPaper } }}
         >
             <DialogTitle className={styles.dialogTitle}>
-                {t('trainingdata.openverse.title', { className })}
+                {t('trainingdata.imageSearch.title', { className })}
                 <IconButton
                     onClick={handleClose}
                     aria-label={t('trainingdata.aria.close')}
@@ -209,15 +209,15 @@ export default function OpenVerseSearchDialog({
                     onSubmit={handleSubmit}
                 >
                     <TextField
-                        label={t('trainingdata.openverse.searchLabel')}
-                        placeholder={t('trainingdata.openverse.searchPlaceholder')}
+                        label={t('trainingdata.imageSearch.searchLabel')}
+                        placeholder={t('trainingdata.imageSearch.searchPlaceholder')}
                         value={query}
                         onChange={(event) => {
                             setQuery(event.target.value);
                             setShowEmptyQuery(false);
                         }}
                         disabled={isSearching}
-                        helperText={showEmptyQuery ? t('trainingdata.openverse.emptyQuery') : undefined}
+                        helperText={showEmptyQuery ? t('trainingdata.imageSearch.emptyQuery') : undefined}
                         className={styles.searchField}
                     />
                     <Button
@@ -225,7 +225,7 @@ export default function OpenVerseSearchDialog({
                         variant="contained"
                         disabled={isSearching || query.trim().length === 0}
                     >
-                        {t('trainingdata.openverse.searchAction')}
+                        {t('trainingdata.imageSearch.searchAction')}
                     </Button>
                 </form>
 
@@ -233,19 +233,19 @@ export default function OpenVerseSearchDialog({
                     aria-live="polite"
                     className={styles.stateRegion}
                 >
-                    {status === 'idle' && <Typography>{t('trainingdata.openverse.initial')}</Typography>}
+                    {status === 'idle' && <Typography>{t('trainingdata.imageSearch.initial')}</Typography>}
 
                     {status === 'loading' && (
                         <div className={styles.loadingState}>
                             <CircularProgress size={24} />
-                            <Typography>{t('trainingdata.openverse.loading')}</Typography>
+                            <Typography>{t('trainingdata.imageSearch.loading')}</Typography>
                         </div>
                     )}
 
                     {status === 'empty' && (
                         <div className={styles.emptyState}>
-                            <Typography className={styles.stateTitle}>{t('trainingdata.openverse.emptyTitle')}</Typography>
-                            <Typography>{t('trainingdata.openverse.emptyBody')}</Typography>
+                            <Typography className={styles.stateTitle}>{t('trainingdata.imageSearch.emptyTitle')}</Typography>
+                            <Typography>{t('trainingdata.imageSearch.emptyBody')}</Typography>
                         </div>
                     )}
 
@@ -258,13 +258,13 @@ export default function OpenVerseSearchDialog({
                                     onClick={handleRetry}
                                     disabled={isSearching}
                                 >
-                                    {t('trainingdata.openverse.retry')}
+                                    {t('trainingdata.imageSearch.retry')}
                                 </Button>
                             }
                         >
                             {status === 'rate-limited'
-                                ? t('trainingdata.openverse.rateLimit')
-                                : t('trainingdata.openverse.retryableError')}
+                                ? t('trainingdata.imageSearch.rateLimit')
+                                : t('trainingdata.imageSearch.retryableError')}
                         </Alert>
                     )}
 
@@ -274,7 +274,7 @@ export default function OpenVerseSearchDialog({
                             role="status"
                         >
                             <CircularProgress size={20} />
-                            <Typography>{t('trainingdata.openverse.loadingMore')}</Typography>
+                            <Typography>{t('trainingdata.imageSearch.loadingMore')}</Typography>
                         </div>
                     )}
                 </div>
@@ -284,7 +284,7 @@ export default function OpenVerseSearchDialog({
                         {results.map((result) => {
                             const isPending = pendingUseIds.has(result.id);
                             const hasFailed = failedUseIds.has(result.id);
-                            const accessibleTitle = result.title || t('trainingdata.openverse.fallbackAlt');
+                            const accessibleTitle = result.title || t('trainingdata.imageSearch.fallbackAlt');
 
                             return (
                                 <button
@@ -293,20 +293,20 @@ export default function OpenVerseSearchDialog({
                                     className={styles.resultButton}
                                     onClick={() => void handleUseImage(result)}
                                     disabled={isPending}
-                                    aria-label={`${t('trainingdata.openverse.useImage')}: ${accessibleTitle}`}
+                                    aria-label={`${t('trainingdata.imageSearch.useImage')}: ${accessibleTitle}`}
                                 >
                                     <img
                                         src={result.thumbnailUrl}
                                         alt={accessibleTitle}
                                         className={styles.resultImage}
                                     />
-                                    <span className={styles.resultOverlay}>{t('trainingdata.openverse.useImage')}</span>
+                                    <span className={styles.resultOverlay}>{t('trainingdata.imageSearch.useImage')}</span>
                                     {isPending && (
                                         <span
                                             className={styles.pendingUse}
                                             role="status"
                                         >
-                                            {t('trainingdata.openverse.pendingUse')}
+                                            {t('trainingdata.imageSearch.pendingUse')}
                                         </span>
                                     )}
                                     {hasFailed && (
@@ -314,7 +314,7 @@ export default function OpenVerseSearchDialog({
                                             className={styles.failedUse}
                                             role="status"
                                         >
-                                            {t('trainingdata.openverse.failedUse')}
+                                            {t('trainingdata.imageSearch.failedUse')}
                                         </span>
                                     )}
                                 </button>
@@ -330,7 +330,7 @@ export default function OpenVerseSearchDialog({
                             onClick={handleLoadMore}
                             disabled={isSearching}
                         >
-                            {t('trainingdata.openverse.more')}
+                            {t('trainingdata.imageSearch.more')}
                         </Button>
                     </div>
                 )}

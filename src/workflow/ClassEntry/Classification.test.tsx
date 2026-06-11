@@ -5,23 +5,16 @@ import type { ReactNode } from 'react';
 import { Classification } from './Classification';
 import TestWrapper from '../../util/TestWrapper';
 import { VariantContext, type IVariantContext } from '../../util/variant';
-import { searchOpenVerseImages, type OpenVerseImageResult } from '@genaitm/util/openverse';
-import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
+import { searchWikimediaCommonsImages } from '@genaitm/util/wikimediaCommons';
+import type { ImageSearchResult } from '@genaitm/util/imageSearch';
+import { importRemoteImage } from '@genaitm/util/remoteImageImport';
 
-vi.mock('@genaitm/util/openverse', () => ({
-    OpenVerseSearchError: class OpenVerseSearchError extends Error {
-        readonly code: string;
-
-        constructor(code: string, message: string) {
-            super(message);
-            this.code = code;
-        }
-    },
-    searchOpenVerseImages: vi.fn(),
+vi.mock('@genaitm/util/wikimediaCommons', () => ({
+    searchWikimediaCommonsImages: vi.fn(),
 }));
 
-vi.mock('@genaitm/util/openverseImageImport', () => ({
-    importOpenVerseImage: vi.fn(),
+vi.mock('@genaitm/util/remoteImageImport', () => ({
+    importRemoteImage: vi.fn(),
 }));
 
 vi.mock('react-i18next', () => ({
@@ -32,23 +25,23 @@ vi.mock('react-i18next', () => ({
                 'trainingdata.actions.audio': 'Mikrofon',
                 'trainingdata.actions.upload': 'Hochladen',
                 'trainingdata.actions.datasets': 'Datensätze',
-                'trainingdata.actions.openverse': 'Bildsuche',
+                'trainingdata.actions.imageSearch': 'Bildsuche',
                 'trainingdata.labels.addSamples': 'Bildbeispiele hinzufügen',
                 'trainingdata.labels.addAudioSamples': 'Audiobeispiele hinzufügen',
                 'trainingdata.labels.dropFiles': 'oder ziehe Bilder von einer Website oder Datei hierher',
                 'trainingdata.labels.dropAudioFiles': 'oder ziehe Audiodateien von einer Website oder Datei hierher',
                 'trainingdata.aria.classCard': `Trainingsdaten für ${values?.name ?? ''}`,
                 'trainingdata.aria.close': 'Schließen',
-                'trainingdata.openverse.title': `OpenVerse: ${values?.className ?? ''}`,
-                'trainingdata.openverse.searchLabel': 'Suchbegriff',
-                'trainingdata.openverse.searchPlaceholder': 'z. B. Katze',
-                'trainingdata.openverse.searchAction': 'Bilder suchen',
-                'trainingdata.openverse.useImage': 'Dieses Bild nutzen',
-                'trainingdata.openverse.initial': 'Suche nach Bildern für diese Klasse.',
-                'trainingdata.openverse.loading': 'Suche Bilder...',
-                'trainingdata.openverse.pendingUse': 'Bild wird hinzugefügt...',
-                'trainingdata.openverse.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
-                'trainingdata.openverse.fallbackAlt': 'OpenVerse Bild',
+                'trainingdata.imageSearch.title': `Wikimedia Commons: ${values?.className ?? ''}`,
+                'trainingdata.imageSearch.searchLabel': 'Suchbegriff',
+                'trainingdata.imageSearch.searchPlaceholder': 'z. B. Katze',
+                'trainingdata.imageSearch.searchAction': 'Bilder suchen',
+                'trainingdata.imageSearch.useImage': 'Dieses Bild nutzen',
+                'trainingdata.imageSearch.initial': 'Suche nach Bildern für diese Klasse.',
+                'trainingdata.imageSearch.loading': 'Suche Bilder...',
+                'trainingdata.imageSearch.pendingUse': 'Bild wird hinzugefügt...',
+                'trainingdata.imageSearch.failedUse': 'Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.',
+                'trainingdata.imageSearch.fallbackAlt': 'Bild aus Wikimedia Commons',
             };
             return translations[key] ?? key;
         },
@@ -68,14 +61,14 @@ const speechVariant: IVariantContext = {
     sampleUploadFile: true,
 };
 
-const catResult: OpenVerseImageResult = {
+const catResult: ImageSearchResult = {
     id: 'cat-1',
     title: 'Katze',
     imageUrl: 'https://example.com/cat-full.jpg',
     thumbnailUrl: 'https://example.com/cat-thumb.jpg',
 };
 
-const dogResult: OpenVerseImageResult = {
+const dogResult: ImageSearchResult = {
     id: 'dog-1',
     title: 'Hund',
     imageUrl: 'https://example.com/dog-full.jpg',
@@ -100,8 +93,8 @@ function deferred<T>() {
 
 describe('Classification component', () => {
     beforeEach(() => {
-        vi.mocked(searchOpenVerseImages).mockReset();
-        vi.mocked(importOpenVerseImage).mockReset();
+        vi.mocked(searchWikimediaCommonsImages).mockReset();
+        vi.mocked(importRemoteImage).mockReset();
     });
 
     it('renders with no samples and inactive', async ({ expect }) => {
@@ -122,7 +115,7 @@ describe('Classification component', () => {
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
     });
 
-    it('shows dataset and OpenVerse actions beside camera and upload for image classes', async ({ expect }) => {
+    it('shows dataset and Wikimedia Commons actions beside camera and upload for image classes', async ({ expect }) => {
         render(
             <Classification
                 name="Katze"
@@ -140,10 +133,10 @@ describe('Classification component', () => {
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
         expect(screen.getByTestId('uploadbutton')).toBeInTheDocument();
         expect(screen.getByTestId('datasetbutton')).toHaveTextContent('Datensätze');
-        expect(screen.getByTestId('openversebutton')).toHaveTextContent('Bildsuche');
+        expect(screen.getByTestId('image-search-button')).toHaveTextContent('Bildsuche');
     });
 
-    it('opens the OpenVerse dialog with the current class name', async ({ expect }) => {
+    it('opens the Wikimedia Commons dialog with the current class name', async ({ expect }) => {
         const user = userEvent.setup();
 
         render(
@@ -160,12 +153,12 @@ describe('Classification component', () => {
             { wrapper: TestWrapper }
         );
 
-        await user.click(screen.getByTestId('openversebutton'));
+        await user.click(screen.getByTestId('image-search-button'));
 
-        expect(await screen.findByText('OpenVerse: Katze')).toBeInTheDocument();
+        expect(await screen.findByText('Wikimedia Commons: Katze')).toBeInTheDocument();
     });
 
-    it('does not show the OpenVerse image search action for speech classes', async ({ expect }) => {
+    it('does not show the Wikimedia Commons image search action for speech classes', async ({ expect }) => {
         render(
             <VariantContext.Provider value={speechVariant}>
                 <Classification
@@ -184,22 +177,22 @@ describe('Classification component', () => {
 
         expect(screen.getByTestId('webcambutton')).toBeInTheDocument();
         expect(screen.queryByTestId('datasetbutton')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('openversebutton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('image-search-button')).not.toBeInTheDocument();
         expect(screen.queryByText('Bildsuche')).not.toBeInTheDocument();
     });
 
-    it('imports a selected OpenVerse result before prepending a normal sample', async ({ expect }) => {
+    it('imports a selected Wikimedia Commons result before prepending a normal sample', async ({ expect }) => {
         const user = userEvent.setup();
         const setData = vi.fn();
         const importedCanvas = createCanvas();
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 1,
         });
-        vi.mocked(importOpenVerseImage).mockResolvedValue(importedCanvas);
+        vi.mocked(importRemoteImage).mockResolvedValue(importedCanvas);
 
         render(
             <Classification
@@ -215,13 +208,13 @@ describe('Classification component', () => {
             { wrapper: TestWrapper }
         );
 
-        await user.click(screen.getByTestId('openversebutton'));
+        await user.click(screen.getByTestId('image-search-button'));
         await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
         await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
 
-        await waitFor(() => expect(importOpenVerseImage).toHaveBeenCalledTimes(1));
-        expect(importOpenVerseImage).toHaveBeenCalledWith({
+        await waitFor(() => expect(importRemoteImage).toHaveBeenCalledTimes(1));
+        expect(importRemoteImage).toHaveBeenCalledWith({
             imageUrl: catResult.imageUrl,
             fallbackUrl: catResult.thumbnailUrl,
             signal: expect.any(AbortSignal),
@@ -248,14 +241,14 @@ describe('Classification component', () => {
     it('keeps the dialog recoverable and leaves samples unchanged when import fails', async ({ expect }) => {
         const user = userEvent.setup();
         const setData = vi.fn();
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 1,
         });
-        vi.mocked(importOpenVerseImage).mockRejectedValue(new Error('import failed'));
+        vi.mocked(importRemoteImage).mockRejectedValue(new Error('import failed'));
 
         render(
             <Classification
@@ -271,7 +264,7 @@ describe('Classification component', () => {
             { wrapper: TestWrapper }
         );
 
-        await user.click(screen.getByTestId('openversebutton'));
+        await user.click(screen.getByTestId('image-search-button'));
         await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
         await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
@@ -285,14 +278,14 @@ describe('Classification component', () => {
         const user = userEvent.setup();
         const setData = vi.fn();
         const pendingImport = deferred<HTMLCanvasElement>();
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 1,
         });
-        vi.mocked(importOpenVerseImage).mockReturnValue(pendingImport.promise);
+        vi.mocked(importRemoteImage).mockReturnValue(pendingImport.promise);
 
         const { rerender } = render(
             <Classification
@@ -308,7 +301,7 @@ describe('Classification component', () => {
             { wrapper: TestWrapper }
         );
 
-        await user.click(screen.getByTestId('openversebutton'));
+        await user.click(screen.getByTestId('image-search-button'));
         await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
         await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
@@ -336,14 +329,14 @@ describe('Classification component', () => {
         const setData = vi.fn();
         const firstImport = deferred<HTMLCanvasElement>();
         const secondCanvas = createCanvas('second-canvas');
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult, dogResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 2,
         });
-        vi.mocked(importOpenVerseImage)
+        vi.mocked(importRemoteImage)
             .mockReturnValueOnce(firstImport.promise)
             .mockResolvedValueOnce(secondCanvas);
 
@@ -361,7 +354,7 @@ describe('Classification component', () => {
             { wrapper: TestWrapper }
         );
 
-        await user.click(screen.getByTestId('openversebutton'));
+        await user.click(screen.getByTestId('image-search-button'));
         await user.type(screen.getByLabelText('Suchbegriff'), 'tier');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
         await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
@@ -380,14 +373,14 @@ describe('Classification component', () => {
     it('keeps the dialog open when the target class update is rejected', async ({ expect }) => {
         const user = userEvent.setup();
         const setData = vi.fn(() => false);
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 1,
         });
-        vi.mocked(importOpenVerseImage).mockResolvedValue(createCanvas());
+        vi.mocked(importRemoteImage).mockResolvedValue(createCanvas());
 
         render(
             <Classification
@@ -403,12 +396,12 @@ describe('Classification component', () => {
             { wrapper: TestWrapper }
         );
 
-        await user.click(screen.getByTestId('openversebutton'));
+        await user.click(screen.getByTestId('image-search-button'));
         await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
         await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
         await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
 
         expect(await screen.findByText('Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.')).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: 'OpenVerse: Katze' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Wikimedia Commons: Katze' })).toBeInTheDocument();
     });
 });

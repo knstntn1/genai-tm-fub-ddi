@@ -4,7 +4,7 @@
 
 See: .planning/PROJECT.md (updated 2026-05-06)
 
-**Core value:** Students can add useful image examples to a class through a trivial OpenVerse search flow without leaving the training-data workflow.
+**Core value:** Students can add useful image examples to a class through a trivial Wikimedia Commons search flow without leaving the training-data workflow.
 **Current focus:** Milestone complete
 
 ## Current Position
@@ -33,7 +33,7 @@ Progress: [██████████] 100%
 | Phase 4 | 1 | same-day | same-day |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 Remote Image Import Boundary, 02-01 OpenVerse Search Dialog, 02-02 OpenVerse Locale Keys, 03-01 Training Workflow Integration, 04-01 Live Browser Validation
+- Last 5 plans: 01-02 Remote Image Import Boundary, 02-01 Wikimedia Commons Search Dialog, 02-02 Wikimedia Commons Locale Keys, 03-01 Training Workflow Integration, 04-01 Live Browser Validation
 - Trend: Milestone complete
 
 *Updated after each plan completion*
@@ -45,26 +45,27 @@ Progress: [██████████] 100%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Project]: Add OpenVerse image search as a third image-sample source in the existing image training workflow.
+- [Project]: Add Wikimedia Commons image search as a third image-sample source in the existing image training workflow.
 - [Project]: Keep v1 as "Einfacher Import" with no visible attribution/license UI or advanced filters.
-- [Project]: Integrate only successfully converted OpenVerse images into the existing class sample state.
+- [Project]: Integrate only successfully converted Wikimedia Commons images into the existing class sample state.
 - [Project]: Prefer direct browser integration in the static SPA unless validation proves a proxy/cache is required.
-- [Phase 1]: Valid OpenVerse `results: []` responses are successful empty search responses, not typed errors, so Phase 2 can render a normal empty-result UI state.
-- [Phase 2]: OpenVerse search UI is a reusable dialog boundary that calls `onUseImage(result)` only; Phase 3 owns the class-card entry point and actual sample import.
-- [Phase 3]: OpenVerse imports are guarded by class object identity, not label alone, so same-label class shifts cannot receive stale imports.
+- [Phase 1]: Valid Wikimedia Commons `results: []` responses are successful empty search responses, not typed errors, so Phase 2 can render a normal empty-result UI state.
+- [Phase 2]: Wikimedia Commons search UI is a reusable dialog boundary that calls `onUseImage(result)` only; Phase 3 owns the class-card entry point and actual sample import.
+- [Phase 3]: Wikimedia Commons imports are guarded by class object identity, not label alone, so same-label class shifts cannot receive stale imports.
 - [Phase 3]: `scripts/addOpenVerseLocaleKeys.cjs --check` now exits non-zero on locale drift.
-- [Phase 4]: OpenVerse imports must normalize remote images to the model's `224x224` square training-canvas shape before adding samples.
-- [Phase 4]: Direct browser OpenVerse import is sufficient for v1 after the training-canvas normalization fix; proxy/cache remains v2 unless classroom pilots reveal school-network, hotlink, rate-limit, or policy issues.
+- [Phase 4]: Wikimedia Commons imports must normalize remote images to the model's `224x224` square training-canvas shape before adding samples.
+- [Phase 4]: Direct browser Wikimedia Commons import is sufficient for v1 after the training-canvas normalization fix; proxy/cache remains v2 unless classroom pilots reveal school-network, hotlink, rate-limit, or policy issues.
+- [Post milestone]: Wikimedia Commons replaced OpenVerse as the active provider. Search results and remote imports now use provider-neutral app boundaries; legacy `openverse` dataset source values remain readable.
 
 ### Pending Todos
 
-- Human-validate the DataExplorer browser flow: file picker upload, webcam capture, real OpenVerse import, project ZIP save/reopen, and managed training/test picker UX.
+- Human-validate the DataExplorer browser flow: file picker upload, webcam capture, real Wikimedia Commons import, project ZIP save/reopen, and managed training/test picker UX.
 
 ### Blockers/Concerns
 
 - Dataset management quick task is implemented but still needs browser/device validation before classroom rollout.
-- Anonymous OpenVerse rate limits and classroom-network behavior should still be monitored during classroom pilots.
-- Client-side `mature=false` is best-effort and does not guarantee complete classroom-safe results.
+- Anonymous Wikimedia Commons rate limits and classroom-network behavior should still be monitored during classroom pilots.
+- Wikimedia Commons does not provide a dependable classroom-safe search filter; content moderation remains a product risk.
 
 ### Quick Tasks Completed
 
@@ -79,9 +80,9 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | *(none)* | | | |
-| Browser validation | Real browser visual/touch check for OpenVerseSearchDialog, including 2/3/4 grid, hover/focus/touch overlay, and no metadata/filter UI | Completed in Phase 4 browser validation | Phase 4 verification |
+| Browser validation | Real browser visual/touch check for ImageSearchDialog, including 2/3/4 grid, hover/focus/touch overlay, and no metadata/filter UI | Completed in Phase 4 browser validation | Phase 4 verification |
 | Browser validation | Real browser desktop/tablet/mobile check for `Bildsuche` label fit, focus return, touch reachability, and integrated dialog overlay access | Completed in Phase 4 browser validation | Phase 4 verification |
-| Live provider validation | Real OpenVerse provider/CORS/canvas readability, browser save/load, and training with imported samples | Completed in Phase 4 browser validation | Phase 4 verification |
+| Live provider validation | Real Wikimedia Commons provider/CORS/canvas readability, browser save/load, and training with imported samples | Completed in Phase 4 browser validation | Phase 4 verification |
 
 ## Session Continuity
 

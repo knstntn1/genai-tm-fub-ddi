@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-    importOpenVerseImage,
-    OpenVerseImageImportError,
-    DEFAULT_OPENVERSE_IMPORT_MAX_SIZE,
-    DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS,
-} from './openverseImageImport';
+    importRemoteImage,
+    RemoteImageImportError,
+    DEFAULT_REMOTE_IMAGE_IMPORT_MAX_SIZE,
+    DEFAULT_REMOTE_IMAGE_IMPORT_TIMEOUT_MS,
+} from './remoteImageImport';
 
 interface ImageBehavior {
     type: 'load' | 'error' | 'stall';
@@ -64,7 +64,7 @@ class MockImage {
     }
 }
 
-describe('importOpenVerseImage', () => {
+describe('importRemoteImage', () => {
     beforeEach(() => {
         imageBehaviors.length = 0;
         loadedUrls.length = 0;
@@ -86,8 +86,8 @@ describe('importOpenVerseImage', () => {
     });
 
     it('exports classroom-safe import defaults', ({ expect }) => {
-        expect(DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS).toBe(10000);
-        expect(DEFAULT_OPENVERSE_IMPORT_MAX_SIZE).toBe(224);
+        expect(DEFAULT_REMOTE_IMAGE_IMPORT_TIMEOUT_MS).toBe(10000);
+        expect(DEFAULT_REMOTE_IMAGE_IMPORT_MAX_SIZE).toBe(224);
     });
 
     it('loads a remote image into a readable styled 224x224 training canvas with getImageData(0, 0, 1, 1)', async ({
@@ -95,7 +95,7 @@ describe('importOpenVerseImage', () => {
     }) => {
         imageBehaviors.push({ type: 'load', width: 200, height: 100 });
 
-        const canvas = await importOpenVerseImage({ imageUrl: 'https://example.test/image.jpg' });
+        const canvas = await importRemoteImage({ imageUrl: 'https://example.test/image.jpg' });
 
         expect(canvas).toBeInstanceOf(HTMLCanvasElement);
         expect(canvas.width).toBe(224);
@@ -109,7 +109,7 @@ describe('importOpenVerseImage', () => {
     it('uses maxSize as the square training canvas target size', async ({ expect }) => {
         imageBehaviors.push({ type: 'load', width: 1600, height: 800 });
 
-        const canvas = await importOpenVerseImage({
+        const canvas = await importRemoteImage({
             imageUrl: 'https://example.test/large.jpg',
             maxSize: 400,
         });
@@ -123,7 +123,7 @@ describe('importOpenVerseImage', () => {
     it('loads the fallback URL when the primary URL fails', async ({ expect }) => {
         imageBehaviors.push({ type: 'error' }, { type: 'load', width: 80, height: 120 });
 
-        const canvas = await importOpenVerseImage({
+        const canvas = await importRemoteImage({
             imageUrl: 'https://example.test/primary.jpg',
             fallbackUrl: 'https://example.test/thumb.jpg',
         });
@@ -135,7 +135,7 @@ describe('importOpenVerseImage', () => {
     });
 
     it('uses typed import errors', ({ expect }) => {
-        const error = new OpenVerseImageImportError('load-failed', 'failed', 'https://example.test/image.jpg');
+        const error = new RemoteImageImportError('load-failed', 'failed', 'https://example.test/image.jpg');
 
         expect(error).toBeInstanceOf(Error);
         expect(error.code).toBe('load-failed');
@@ -145,7 +145,7 @@ describe('importOpenVerseImage', () => {
     it('rejects load failures with a typed load-failed error', async ({ expect }) => {
         imageBehaviors.push({ type: 'error' });
 
-        await expect(importOpenVerseImage({ imageUrl: 'https://example.test/missing.jpg' })).rejects.toMatchObject({
+        await expect(importRemoteImage({ imageUrl: 'https://example.test/missing.jpg' })).rejects.toMatchObject({
             code: 'load-failed',
             sourceUrl: 'https://example.test/missing.jpg',
         });
@@ -155,7 +155,7 @@ describe('importOpenVerseImage', () => {
         vi.useFakeTimers();
         imageBehaviors.push({ type: 'stall' });
 
-        const promise = importOpenVerseImage({
+        const promise = importRemoteImage({
             imageUrl: 'https://example.test/slow.jpg',
             timeoutMs: 50,
         });
@@ -174,7 +174,7 @@ describe('importOpenVerseImage', () => {
         controller.abort();
 
         await expect(
-            importOpenVerseImage({
+            importRemoteImage({
                 imageUrl: 'https://example.test/aborted.jpg',
                 signal: controller.signal,
             })
@@ -194,7 +194,7 @@ describe('importOpenVerseImage', () => {
             }),
         });
 
-        const promise = importOpenVerseImage({
+        const promise = importRemoteImage({
             imageUrl: 'https://example.test/pending-decode.jpg',
             signal: controller.signal,
         });
@@ -211,7 +211,7 @@ describe('importOpenVerseImage', () => {
     it('rejects decode failures with a typed decode-failed error', async ({ expect }) => {
         imageBehaviors.push({ type: 'load', decodeReject: true });
 
-        await expect(importOpenVerseImage({ imageUrl: 'https://example.test/bad-decode.jpg' })).rejects.toMatchObject({
+        await expect(importRemoteImage({ imageUrl: 'https://example.test/bad-decode.jpg' })).rejects.toMatchObject({
             code: 'decode-failed',
             sourceUrl: 'https://example.test/bad-decode.jpg',
         });
@@ -223,7 +223,7 @@ describe('importOpenVerseImage', () => {
             throw new DOMException('The canvas has been tainted', 'SecurityError');
         });
 
-        await expect(importOpenVerseImage({ imageUrl: 'https://example.test/tainted.jpg' })).rejects.toMatchObject({
+        await expect(importRemoteImage({ imageUrl: 'https://example.test/tainted.jpg' })).rejects.toMatchObject({
             code: 'canvas-unreadable',
             sourceUrl: 'https://example.test/tainted.jpg',
         });
@@ -233,7 +233,7 @@ describe('importOpenVerseImage', () => {
         imageBehaviors.push({ type: 'load' });
 
         await expect(
-            importOpenVerseImage({
+            importRemoteImage({
                 imageUrl: '',
                 fallbackUrl: 'https://example.test/fallback.jpg',
             })
@@ -244,7 +244,7 @@ describe('importOpenVerseImage', () => {
     });
 
     it('keeps duplicate-pending prevention and class state mutation out of the import boundary', ({ expect }) => {
-        const source = readFileSync(resolve('src/util/openverseImageImport.ts'), 'utf8');
+        const source = readFileSync(resolve('src/util/remoteImageImport.ts'), 'utf8');
 
         expect(source).not.toMatch(/@genaitm\/state|classState|setData|samples:/);
         expect(source).not.toMatch(/Set<|new Set|Map<|new Map|pending|importing/);

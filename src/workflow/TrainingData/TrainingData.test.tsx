@@ -5,26 +5,19 @@ import userEvent from '@testing-library/user-event';
 import { TrainingData } from './TrainingData';
 import TestWrapper from '../../util/TestWrapper';
 import type { IClassification } from '../../state';
-import { searchOpenVerseImages, type OpenVerseImageResult } from '@genaitm/util/openverse';
-import { importOpenVerseImage } from '@genaitm/util/openverseImageImport';
+import { searchWikimediaCommonsImages } from '@genaitm/util/wikimediaCommons';
+import type { ImageSearchResult } from '@genaitm/util/imageSearch';
+import { importRemoteImage } from '@genaitm/util/remoteImageImport';
 
-vi.mock('@genaitm/util/openverse', () => ({
-    OpenVerseSearchError: class OpenVerseSearchError extends Error {
-        readonly code: string;
-
-        constructor(code: string, message: string) {
-            super(message);
-            this.code = code;
-        }
-    },
-    searchOpenVerseImages: vi.fn(),
+vi.mock('@genaitm/util/wikimediaCommons', () => ({
+    searchWikimediaCommonsImages: vi.fn(),
 }));
 
-vi.mock('@genaitm/util/openverseImageImport', () => ({
-    importOpenVerseImage: vi.fn(),
+vi.mock('@genaitm/util/remoteImageImport', () => ({
+    importRemoteImage: vi.fn(),
 }));
 
-const catResult: OpenVerseImageResult = {
+const catResult: ImageSearchResult = {
     id: 'cat-1',
     title: 'Cat',
     imageUrl: 'https://example.com/cat-full.jpg',
@@ -99,8 +92,8 @@ function RemovableTrainingData({
 
 describe('TrainingData component', () => {
     beforeEach(() => {
-        vi.mocked(searchOpenVerseImages).mockReset();
-        vi.mocked(importOpenVerseImage).mockReset();
+        vi.mocked(searchWikimediaCommonsImages).mockReset();
+        vi.mocked(importRemoteImage).mockReset();
     });
 
     it('renders with no data', async ({ expect }) => {
@@ -169,21 +162,21 @@ describe('TrainingData component', () => {
         expect(screen.getByTestId('testcanvas')).toBeInTheDocument();
     });
 
-    it('adds an imported OpenVerse canvas only to the selected class and keeps existing sample order behind it', async ({
+    it('adds an imported Wikimedia Commons canvas only to the selected class and keeps existing sample order behind it', async ({
         expect,
     }) => {
         const user = userEvent.setup();
         const importedCanvas = createCanvas('imported-canvas');
         const existingCanvas = createCanvas('existing-canvas');
         let latestData: IClassification[] = [];
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 1,
         });
-        vi.mocked(importOpenVerseImage).mockResolvedValue(importedCanvas);
+        vi.mocked(importRemoteImage).mockResolvedValue(importedCanvas);
 
         render(
             <StatefulTrainingData
@@ -199,10 +192,10 @@ describe('TrainingData component', () => {
         );
 
         const class2 = screen.getByTestId('widget-Class2');
-        await user.click(within(class2).getByTestId('openversebutton'));
-        await user.type(screen.getByLabelText('trainingdata.openverse.searchLabel'), 'cat');
-        await user.click(screen.getByRole('button', { name: 'trainingdata.openverse.searchAction' }));
-        await user.click(await screen.findByRole('button', { name: 'trainingdata.openverse.useImage: Cat' }));
+        await user.click(within(class2).getByTestId('image-search-button'));
+        await user.type(screen.getByLabelText('trainingdata.imageSearch.searchLabel'), 'cat');
+        await user.click(screen.getByRole('button', { name: 'trainingdata.imageSearch.searchAction' }));
+        await user.click(await screen.findByRole('button', { name: 'trainingdata.imageSearch.useImage: Cat' }));
 
         await waitFor(() => expect(latestData[1].samples).toHaveLength(2));
         expect(latestData[0].samples).toHaveLength(0);
@@ -216,14 +209,14 @@ describe('TrainingData component', () => {
         const pendingImport = deferred<HTMLCanvasElement>();
         let latestData: IClassification[] = [];
         let removeFirstClass = () => {};
-        vi.mocked(searchOpenVerseImages).mockResolvedValue({
+        vi.mocked(searchWikimediaCommonsImages).mockResolvedValue({
             results: [catResult],
             page: 1,
             pageCount: 1,
             pageSize: 20,
             resultCount: 1,
         });
-        vi.mocked(importOpenVerseImage).mockReturnValue(pendingImport.promise);
+        vi.mocked(importRemoteImage).mockReturnValue(pendingImport.promise);
 
         render(
             <RemovableTrainingData
@@ -242,10 +235,10 @@ describe('TrainingData component', () => {
         );
 
         const secondClass = screen.getAllByTestId('widget-Same')[1];
-        await user.click(within(secondClass).getByTestId('openversebutton'));
-        await user.type(screen.getByLabelText('trainingdata.openverse.searchLabel'), 'cat');
-        await user.click(screen.getByRole('button', { name: 'trainingdata.openverse.searchAction' }));
-        await user.click(await screen.findByRole('button', { name: 'trainingdata.openverse.useImage: Cat' }));
+        await user.click(within(secondClass).getByTestId('image-search-button'));
+        await user.type(screen.getByLabelText('trainingdata.imageSearch.searchLabel'), 'cat');
+        await user.click(screen.getByRole('button', { name: 'trainingdata.imageSearch.searchAction' }));
+        await user.click(await screen.findByRole('button', { name: 'trainingdata.imageSearch.useImage: Cat' }));
         await act(async () => {
             removeFirstClass();
         });

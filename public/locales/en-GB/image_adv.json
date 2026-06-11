@@ -73,7 +73,7 @@
             "cancel": "Cancel",
             "use": "Use ({{count}})",
             "displayMore": "Display {{count}} images",
-            "openverse": "Image search"
+            "imageSearch": "Image search"
         },
         "labels": {
             "title": "Training Data",
@@ -109,8 +109,8 @@
             "close": "Close",
             "classCard": "Training data for {{name}}"
         },
-        "openverse": {
-            "title": "OpenVerse: {{className}}",
+        "imageSearch": {
+            "title": "Wikimedia Commons: {{className}}",
             "searchLabel": "Search term",
             "searchPlaceholder": "e.g. cat",
             "searchAction": "Search images",
@@ -127,7 +127,7 @@
             "more": "More results",
             "pendingUse": "Adding image...",
             "failedUse": "This image could not be used. Please try again.",
-            "fallbackAlt": "OpenVerse image"
+            "fallbackAlt": "Image from Wikimedia Commons"
         }
     },
     "heatmap": {

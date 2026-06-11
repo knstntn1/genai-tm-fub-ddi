@@ -16,7 +16,7 @@ vi.mock('@genaitm/workflow/ClassEntry/WebcamCapture', () => ({
     default: () => null,
 }));
 
-vi.mock('@genaitm/workflow/OpenVerseSearch/OpenVerseSearchDialog', () => ({
+vi.mock('@genaitm/workflow/ImageSearch/ImageSearchDialog', () => ({
     default: () => null,
 }));
 

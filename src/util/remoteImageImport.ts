@@ -1,7 +1,7 @@
-export const DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS = 10000;
-export const DEFAULT_OPENVERSE_IMPORT_MAX_SIZE = 224;
+export const DEFAULT_REMOTE_IMAGE_IMPORT_TIMEOUT_MS = 10000;
+export const DEFAULT_REMOTE_IMAGE_IMPORT_MAX_SIZE = 224;
 
-export interface ImportOpenVerseImageOptions {
+export interface ImportRemoteImageOptions {
     imageUrl: string;
     fallbackUrl?: string;
     timeoutMs?: number;
@@ -9,7 +9,7 @@ export interface ImportOpenVerseImageOptions {
     signal?: AbortSignal;
 }
 
-export type OpenVerseImageImportErrorCode =
+export type RemoteImageImportErrorCode =
     | 'load-failed'
     | 'timeout'
     | 'decode-failed'
@@ -17,13 +17,13 @@ export type OpenVerseImageImportErrorCode =
     | 'unsupported-image'
     | 'aborted';
 
-export class OpenVerseImageImportError extends Error {
-    readonly code: OpenVerseImageImportErrorCode;
+export class RemoteImageImportError extends Error {
+    readonly code: RemoteImageImportErrorCode;
     readonly sourceUrl?: string;
 
-    constructor(code: OpenVerseImageImportErrorCode, message: string, sourceUrl?: string) {
+    constructor(code: RemoteImageImportErrorCode, message: string, sourceUrl?: string) {
         super(message);
-        this.name = 'OpenVerseImageImportError';
+        this.name = 'RemoteImageImportError';
         this.code = code;
         this.sourceUrl = sourceUrl;
     }
@@ -31,8 +31,8 @@ export class OpenVerseImageImportError extends Error {
 
 type ImageLoader = (url: string, signal?: AbortSignal) => Promise<HTMLImageElement>;
 
-function toImportError(code: OpenVerseImageImportErrorCode, sourceUrl?: string): OpenVerseImageImportError {
-    return new OpenVerseImageImportError(code, `OpenVerse image import failed: ${code}`, sourceUrl);
+function toImportError(code: RemoteImageImportErrorCode, sourceUrl?: string): RemoteImageImportError {
+    return new RemoteImageImportError(code, `Remote image import failed: ${code}`, sourceUrl);
 }
 
 function assertSupportedImageUrl(url: string): string {
@@ -47,7 +47,7 @@ function assertSupportedImageUrl(url: string): string {
             throw toImportError('unsupported-image', trimmedUrl);
         }
     } catch (error) {
-        if (error instanceof OpenVerseImageImportError) {
+        if (error instanceof RemoteImageImportError) {
             throw error;
         }
         throw toImportError('unsupported-image', trimmedUrl);
@@ -96,7 +96,7 @@ function getCoverCrop(
 
 async function loadImage(
     url: string,
-    timeoutMs: number = DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS,
+    timeoutMs: number = DEFAULT_REMOTE_IMAGE_IMPORT_TIMEOUT_MS,
     signal?: AbortSignal
 ): Promise<HTMLImageElement> {
     const sourceUrl = assertSupportedImageUrl(url);
@@ -154,7 +154,7 @@ async function loadImage(
 function canvasFromImage(image: HTMLImageElement, maxSize: number): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     const sourceDimensions = getSourceDimensions(image);
-    const targetSize = maxSize > 0 ? maxSize : DEFAULT_OPENVERSE_IMPORT_MAX_SIZE;
+    const targetSize = maxSize > 0 ? maxSize : DEFAULT_REMOTE_IMAGE_IMPORT_MAX_SIZE;
     const crop = getCoverCrop(sourceDimensions);
 
     canvas.width = targetSize;
@@ -191,16 +191,16 @@ async function importWithLoader(
     return canvasFromImage(image, maxSize);
 }
 
-export async function importOpenVerseImage(options: ImportOpenVerseImageOptions): Promise<HTMLCanvasElement> {
-    const timeoutMs = options.timeoutMs ?? DEFAULT_OPENVERSE_IMPORT_TIMEOUT_MS;
-    const maxSize = options.maxSize ?? DEFAULT_OPENVERSE_IMPORT_MAX_SIZE;
+export async function importRemoteImage(options: ImportRemoteImageOptions): Promise<HTMLCanvasElement> {
+    const timeoutMs = options.timeoutMs ?? DEFAULT_REMOTE_IMAGE_IMPORT_TIMEOUT_MS;
+    const maxSize = options.maxSize ?? DEFAULT_REMOTE_IMAGE_IMPORT_MAX_SIZE;
     const loader: ImageLoader = (url, signal) => loadImage(url, timeoutMs, signal);
 
     try {
         return await importWithLoader(options.imageUrl, loader, maxSize, options.signal);
     } catch (error) {
         if (
-            error instanceof OpenVerseImageImportError &&
+            error instanceof RemoteImageImportError &&
             (error.code === 'aborted' || error.code === 'unsupported-image')
         ) {
             throw error;
