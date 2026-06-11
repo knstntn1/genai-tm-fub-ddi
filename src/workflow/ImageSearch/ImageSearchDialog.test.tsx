@@ -8,9 +8,9 @@ import { ImageSearchError, type ImageSearchResult, type ImageSearchResponse } fr
 
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
-        t: (key: string, values?: Record<string, string>) => {
+        t: (key: string) => {
             const copy: Record<string, string> = {
-                'trainingdata.imageSearch.title': `Wikimedia Commons: ${values?.className ?? ''}`,
+                'trainingdata.imageSearch.title': 'Bildersuche',
                 'trainingdata.imageSearch.searchLabel': 'Suchbegriff',
                 'trainingdata.imageSearch.searchPlaceholder': 'z. B. Katze',
                 'trainingdata.imageSearch.searchAction': 'Bilder suchen',
@@ -74,7 +74,6 @@ function renderDialog(
     return render(
         <ImageSearchDialog
             open={true}
-            className="Klasse 1"
             onClose={() => {}}
             onUseImage={onUseImage}
             searchClient={searchClient}
@@ -83,10 +82,10 @@ function renderDialog(
 }
 
 describe('ImageSearchDialog', () => {
-    it('shows the current class in the dialog title', ({ expect }) => {
+    it('shows a provider-neutral dialog title', ({ expect }) => {
         renderDialog();
 
-        expect(screen.getByRole('heading', { name: 'Wikimedia Commons: Klasse 1' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Bildersuche' })).toBeInTheDocument();
     });
 
     it('submits only through the button or Enter and blocks whitespace queries', async ({ expect }) => {
@@ -131,7 +130,6 @@ describe('ImageSearchDialog', () => {
         const pendingRender = render(
             <ImageSearchDialog
                 open={true}
-                className="Klasse 1"
                 onClose={() => {}}
                 onUseImage={() => {}}
                 searchClient={pendingClient}
@@ -150,7 +148,6 @@ describe('ImageSearchDialog', () => {
         const emptyRender = render(
             <ImageSearchDialog
                 open={true}
-                className="Klasse 1"
                 onClose={() => {}}
                 onUseImage={() => {}}
                 searchClient={emptyClient}
@@ -169,7 +166,6 @@ describe('ImageSearchDialog', () => {
         const retryRender = render(
             <ImageSearchDialog
                 open={true}
-                className="Klasse 1"
                 onClose={() => {}}
                 onUseImage={() => {}}
                 searchClient={retryClient}
@@ -188,7 +184,6 @@ describe('ImageSearchDialog', () => {
         render(
             <ImageSearchDialog
                 open={true}
-                className="Klasse 1"
                 onClose={() => {}}
                 onUseImage={() => {}}
                 searchClient={rateLimitClient}

@@ -32,7 +32,7 @@ vi.mock('react-i18next', () => ({
                 'trainingdata.labels.dropAudioFiles': 'oder ziehe Audiodateien von einer Website oder Datei hierher',
                 'trainingdata.aria.classCard': `Trainingsdaten für ${values?.name ?? ''}`,
                 'trainingdata.aria.close': 'Schließen',
-                'trainingdata.imageSearch.title': `Wikimedia Commons: ${values?.className ?? ''}`,
+                'trainingdata.imageSearch.title': 'Bildersuche',
                 'trainingdata.imageSearch.searchLabel': 'Suchbegriff',
                 'trainingdata.imageSearch.searchPlaceholder': 'z. B. Katze',
                 'trainingdata.imageSearch.searchAction': 'Bilder suchen',
@@ -136,7 +136,7 @@ describe('Classification component', () => {
         expect(screen.getByTestId('image-search-button')).toHaveTextContent('Bildsuche');
     });
 
-    it('opens the Wikimedia Commons dialog with the current class name', async ({ expect }) => {
+    it('opens the image search dialog', async ({ expect }) => {
         const user = userEvent.setup();
 
         render(
@@ -155,7 +155,7 @@ describe('Classification component', () => {
 
         await user.click(screen.getByTestId('image-search-button'));
 
-        expect(await screen.findByText('Wikimedia Commons: Katze')).toBeInTheDocument();
+        expect(await screen.findByText('Bildersuche')).toBeInTheDocument();
     });
 
     it('does not show the Wikimedia Commons image search action for speech classes', async ({ expect }) => {
@@ -402,6 +402,6 @@ describe('Classification component', () => {
         await user.click(await screen.findByRole('button', { name: 'Dieses Bild nutzen: Katze' }));
 
         expect(await screen.findByText('Dieses Bild konnte nicht genutzt werden. Bitte erneut versuchen.')).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: 'Wikimedia Commons: Katze' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Bildersuche' })).toBeInTheDocument();
     });
 });

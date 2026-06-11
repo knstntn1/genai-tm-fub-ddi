@@ -1,26 +1,12 @@
 import { describe, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStore, Provider } from 'jotai';
 import { datasetState } from '@genaitm/state';
 import DatasetPicker from './DatasetPicker';
 
-vi.mock('@genaitm/util/datasets', () => ({
-    DATASETS: [],
-    fetchAndCacheDatasets: vi.fn().mockResolvedValue([
-        {
-            id: 'dataset1',
-            nameKey: 'dataset.name',
-            descriptionKey: 'dataset.description',
-            categoryKey: 'dataset.category',
-
-            images: [{ url: 'https://example.com/image1.jpg' }, { url: 'https://example.com/image2.jpg' }],
-        },
-    ]),
-}));
-
 describe('DatasetPicker', () => {
-    it('fetches and displays datasets when opened', async ({ expect }) => {
+    it('shows an empty state when no own datasets exist', ({ expect }) => {
         render(
             <DatasetPicker
                 open={true}
@@ -28,9 +14,9 @@ describe('DatasetPicker', () => {
                 onDatasetSelected={() => {}}
             />
         );
-        await waitFor(() => expect(screen.getByText('dataset.name')).toBeInTheDocument());
-        expect(screen.getByText('dataset.category')).toBeInTheDocument();
-        expect(screen.getAllByTestId('dataset-image')).toHaveLength(2);
+
+        expect(screen.getByText('dataExplorer.empty.noDatasets')).toBeInTheDocument();
+        expect(screen.queryByTestId('dataset-image')).not.toBeInTheDocument();
     });
 
     it('returns managed training canvases without URL loading', async ({ expect }) => {
@@ -93,7 +79,7 @@ describe('DatasetPicker', () => {
         expect(screen.getByText('dataExplorer.empty.noTrainingImages')).toBeInTheDocument();
     });
 
-    it('shows managed datasets before catalogue datasets', async ({ expect }) => {
+    it('shows only own DataExplorer datasets', async ({ expect }) => {
         const canvas = document.createElement('canvas');
         canvas.width = 224;
         canvas.height = 224;
@@ -117,8 +103,8 @@ describe('DatasetPicker', () => {
             </Provider>
         );
 
-        const managed = await screen.findByText('Managed Dataset');
-        const catalogue = await screen.findByText('dataset.name');
-        expect(managed.compareDocumentPosition(catalogue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(await screen.findByText('Managed Dataset')).toBeInTheDocument();
+        expect(screen.getByText('DataExplorer')).toBeInTheDocument();
+        expect(screen.queryByText('dataset.name')).not.toBeInTheDocument();
     });
 });

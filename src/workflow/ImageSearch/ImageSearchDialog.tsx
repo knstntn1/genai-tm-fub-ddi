@@ -31,7 +31,6 @@ interface RetryRequest {
 
 interface Props {
     open: boolean;
-    className: string;
     onClose: () => void;
     onUseImage: (result: ImageSearchResult) => void | Promise<void>;
     searchClient?: SearchClient;
@@ -39,7 +38,6 @@ interface Props {
 
 export default function ImageSearchDialog({
     open,
-    className,
     onClose,
     onUseImage,
     searchClient = searchWikimediaCommonsImages,
@@ -194,7 +192,7 @@ export default function ImageSearchDialog({
             slotProps={{ paper: { className: styles.dialogPaper } }}
         >
             <DialogTitle className={styles.dialogTitle}>
-                {t('trainingdata.imageSearch.title', { className })}
+                {t('trainingdata.imageSearch.title')}
                 <IconButton
                     onClick={handleClose}
                     aria-label={t('trainingdata.aria.close')}

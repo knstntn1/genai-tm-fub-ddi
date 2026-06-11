@@ -109,7 +109,7 @@
             "classCard": "Trainingsdaten für {{name}}"
         },
         "imageSearch": {
-            "title": "Wikimedia Commons: {{className}}",
+            "title": "Bildersuche",
             "searchLabel": "Suchbegriff",
             "searchPlaceholder": "z. B. Katze",
             "searchAction": "Bilder suchen",

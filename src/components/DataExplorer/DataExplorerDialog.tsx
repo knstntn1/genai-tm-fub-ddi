@@ -1,4 +1,4 @@
-import { ChangeEvent, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useMemo, useRef, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -28,10 +28,8 @@ import {
 import { importRemoteImage } from '@genaitm/util/remoteImageImport';
 import type { ImageSearchResult } from '@genaitm/util/imageSearch';
 import { useVariant } from '@genaitm/util/variant';
-import { DATASETS, Dataset, fetchAndCacheDatasets } from '@genaitm/util/datasets';
 import WebcamCapture from '@genaitm/workflow/ClassEntry/WebcamCapture';
 import ImageSearchDialog from '@genaitm/workflow/ImageSearch/ImageSearchDialog';
-import DatasetCategory from '@genaitm/components/DatasetPicker/DatasetCategory';
 import styles from './DataExplorerDialog.module.css';
 
 interface Props {
@@ -55,17 +53,7 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     const [showWebcam, setShowWebcam] = useState(false);
     const [showImageSearch, setShowImageSearch] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [remoteDatasets, setRemoteDatasets] = useState<Dataset[]>(DATASETS);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (!open) return;
-        if (DATASETS.length > 0) {
-            setRemoteDatasets([...DATASETS]);
-            return;
-        }
-        fetchAndCacheDatasets().then(setRemoteDatasets);
-    }, [open]);
 
     const selectedDataset = useMemo(
         () => datasets.find((dataset) => dataset.id === selectedDatasetId) ?? datasets[0],
@@ -73,15 +61,6 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     );
 
     const selectedId = selectedDataset?.id ?? null;
-    const remoteDatasetsByCategory = useMemo(
-        () =>
-            remoteDatasets.reduce((acc: Record<string, Dataset[]>, dataset) => {
-                if (!acc[dataset.categoryKey]) acc[dataset.categoryKey] = [];
-                acc[dataset.categoryKey].push(dataset);
-                return acc;
-            }, {}),
-        [remoteDatasets]
-    );
 
     const addDataset = useCallback(() => {
         const dataset = createProjectDataset(newName || t('dataExplorer.defaultDatasetName'));
@@ -367,30 +346,6 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                     </>
                                 )}
                             </section>
-                            <section className={styles.remoteSection}>
-                                <Typography
-                                    component="h3"
-                                    className={styles.sectionTitle}
-                                >
-                                    {t('dataExplorer.sections.existingDatasets')}
-                                </Typography>
-                                {Object.keys(remoteDatasetsByCategory).length === 0 && (
-                                    <Typography className={styles.emptyState}>
-                                        {t('dataExplorer.empty.noExistingDatasets')}
-                                    </Typography>
-                                )}
-                                {Object.entries(remoteDatasetsByCategory).map(([categoryKey, categoryDatasets]) => (
-                                    <Fragment key={categoryKey}>
-                                        {categoryDatasets.length > 0 && (
-                                            <DatasetCategory
-                                                categoryKey={categoryKey}
-                                                datasets={categoryDatasets}
-                                                singleSelect
-                                            />
-                                        )}
-                                    </Fragment>
-                                ))}
-                            </section>
                         </section>
                     </div>
                 </DialogContent>
@@ -402,7 +357,6 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
             />
             <ImageSearchDialog
                 open={open && showImageSearch}
-                className={selectedDataset?.name ?? 'Dataset'}
                 onClose={() => setShowImageSearch(false)}
                 onUseImage={handleUseImageSearchResult}
             />

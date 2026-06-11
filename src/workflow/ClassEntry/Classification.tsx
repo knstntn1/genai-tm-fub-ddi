@@ -570,7 +570,6 @@ export function Classification({
             />
             <ImageSearchDialog
                 open={showImageSearch}
-                className={name}
                 onClose={doImageSearchClose}
                 onUseImage={handleUseImageSearchResult}
             />

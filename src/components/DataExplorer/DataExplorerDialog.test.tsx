@@ -20,19 +20,6 @@ vi.mock('@genaitm/workflow/ImageSearch/ImageSearchDialog', () => ({
     default: () => null,
 }));
 
-vi.mock('@genaitm/util/datasets', () => ({
-    DATASETS: [
-        {
-            id: 'remote-1',
-            nameKey: 'remote.dataset.name',
-            descriptionKey: 'remote.dataset.description',
-            categoryKey: 'remote.dataset.category',
-            images: [{ url: 'https://example.test/image.jpg' }],
-        },
-    ],
-    fetchAndCacheDatasets: vi.fn(),
-}));
-
 describe('DataExplorerDialog', () => {
     it('creates datasets and changes image split tags', async ({ expect }) => {
         const user = userEvent.setup();
@@ -62,8 +49,7 @@ describe('DataExplorerDialog', () => {
         );
 
         expect(screen.getByText('Meine Daten (1)')).toBeInTheDocument();
-        expect(screen.getByText('remote.dataset.category')).toBeInTheDocument();
-        expect(screen.getByText('remote.dataset.name')).toBeInTheDocument();
+        expect(screen.queryByText('dataExplorer.sections.existingDatasets')).not.toBeInTheDocument();
         await user.click(screen.getByRole('button', { name: 'dataExplorer.split.test' }));
         expect(screen.getByRole('button', { name: 'dataExplorer.split.test' })).toHaveAttribute('aria-pressed', 'true');
 

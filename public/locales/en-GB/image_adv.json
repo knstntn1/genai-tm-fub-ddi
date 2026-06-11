@@ -110,7 +110,7 @@
             "classCard": "Training data for {{name}}"
         },
         "imageSearch": {
-            "title": "Wikimedia Commons: {{className}}",
+            "title": "Image search",
             "searchLabel": "Search term",
             "searchPlaceholder": "e.g. cat",
             "searchAction": "Search images",

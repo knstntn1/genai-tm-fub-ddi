@@ -5,11 +5,6 @@ import { createStore, Provider } from 'jotai';
 import { datasetState } from '@genaitm/state';
 import DatasetTestPicker from './DatasetTestPicker';
 
-vi.mock('@genaitm/util/datasets', () => ({
-    DATASETS: [],
-    fetchAndCacheDatasets: vi.fn().mockResolvedValue([]),
-}));
-
 function createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.width = 224;
