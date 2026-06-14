@@ -21,6 +21,39 @@ vi.mock('@genaitm/workflow/ImageSearch/ImageSearchDialog', () => ({
 }));
 
 describe('DataExplorerDialog', () => {
+    it('requires a non-empty dataset name', async ({ expect }) => {
+        const user = userEvent.setup();
+        const onChanged = vi.fn();
+        const store = createStore();
+
+        render(
+            <Provider store={store}>
+                <DataExplorerDialog
+                    open={true}
+                    onClose={() => {}}
+                    onChanged={onChanged}
+                />
+            </Provider>
+        );
+
+        const nameInput = screen.getByRole('textbox', { name: /dataExplorer\.fields\.datasetName/ });
+        const createButton = screen.getByLabelText('dataExplorer.actions.createDataset');
+
+        expect(nameInput).toBeRequired();
+        expect(createButton).toBeDisabled();
+
+        await user.type(nameInput, '   ');
+        expect(createButton).toBeDisabled();
+        expect(onChanged).not.toHaveBeenCalled();
+
+        await user.type(nameInput, ' Neuer Datensatz ');
+        expect(createButton).toBeEnabled();
+        await user.click(createButton);
+
+        expect(screen.getByText('Neuer Datensatz (0)')).toBeInTheDocument();
+        expect(onChanged).toHaveBeenCalledTimes(1);
+    });
+
     it('creates datasets and changes image split tags', async ({ expect }) => {
         const user = userEvent.setup();
         const onChanged = vi.fn();
@@ -53,7 +86,7 @@ describe('DataExplorerDialog', () => {
         await user.click(screen.getByRole('button', { name: 'dataExplorer.split.test' }));
         expect(screen.getByRole('button', { name: 'dataExplorer.split.test' })).toHaveAttribute('aria-pressed', 'true');
 
-        await user.type(screen.getByLabelText('dataExplorer.fields.datasetName'), 'Neu');
+        await user.type(screen.getByRole('textbox', { name: /dataExplorer\.fields\.datasetName/ }), 'Neu');
         await user.click(screen.getByLabelText('dataExplorer.actions.createDataset'));
         expect(screen.getByText('Neu (0)')).toBeInTheDocument();
         expect(onChanged).toHaveBeenCalledTimes(2);

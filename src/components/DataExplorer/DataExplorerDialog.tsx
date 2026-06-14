@@ -61,14 +61,18 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
     );
 
     const selectedId = selectedDataset?.id ?? null;
+    const canCreateDataset = newName.trim().length > 0;
 
     const addDataset = useCallback(() => {
-        const dataset = createProjectDataset(newName || t('dataExplorer.defaultDatasetName'));
+        const datasetName = newName.trim();
+        if (!datasetName) return;
+
+        const dataset = createProjectDataset(datasetName);
         setDatasets((current) => [...current, dataset]);
         onChanged?.();
         setSelectedDatasetId(dataset.id);
         setNewName('');
-    }, [newName, onChanged, setDatasets, t]);
+    }, [newName, onChanged, setDatasets]);
 
     const deleteSelectedDataset = useCallback(() => {
         if (!selectedId) return;
@@ -219,10 +223,12 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                     onChange={(event) => setNewName(event.target.value)}
                                     size="small"
                                     fullWidth
+                                    required
                                 />
                                 <IconButton
                                     onClick={addDataset}
                                     aria-label={t('dataExplorer.actions.createDataset')}
+                                    disabled={!canCreateDataset}
                                 >
                                     <AddIcon />
                                 </IconButton>
