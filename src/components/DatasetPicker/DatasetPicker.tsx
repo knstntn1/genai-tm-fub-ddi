@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { Button } from '@genaitm/components/button/Button';
 import { datasetState, ProjectDatasetImage } from '@genaitm/state';
-import { canvasToDataUrl } from '@genaitm/util/projectDatasets';
+import { canvasToDataUrl, getProjectDatasetImageDisplayId } from '@genaitm/util/projectDatasets';
 import { useVariant } from '@genaitm/util/variant';
 import ImageTile from './ImageTile';
 import styles from './DatasetPicker.module.css';
@@ -102,11 +102,19 @@ export default function DatasetPicker({ open, onClose, onDatasetSelected }: Data
                                     <div className={styles.imagesRow}>
                                         {images.map((image) => {
                                             const selected = selectedImageIds.has(image.id);
+                                            const datasetImageIndex = dataset.images.findIndex(
+                                                (datasetImage) => datasetImage.id === image.id
+                                            );
                                             return (
                                                 <ImageTile
                                                     key={image.id}
                                                     url={canvasToDataUrl(image.data)}
                                                     alt={t('dataExplorer.labels.image')}
+                                                    label={getProjectDatasetImageDisplayId(
+                                                        dataset,
+                                                        image,
+                                                        datasetImageIndex
+                                                    )}
                                                     imgClassName={styles.datasetImage}
                                                     selected={selected}
                                                     containerSelected

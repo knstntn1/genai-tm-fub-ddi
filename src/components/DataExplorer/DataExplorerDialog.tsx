@@ -20,8 +20,9 @@ import { canvasesFromFiles } from '@genai-fi/base';
 import { Button } from '@genaitm/components/button/Button';
 import { datasetState, DatasetSplit } from '@genaitm/state';
 import {
+    addImagesToProjectDataset,
     createProjectDataset,
-    createProjectDatasetImage,
+    getProjectDatasetImageDisplayId,
     removeProjectDatasetImage,
     updateProjectDatasetImageSplit,
 } from '@genaitm/util/projectDatasets';
@@ -85,16 +86,13 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
         (canvases: HTMLCanvasElement[], source: 'upload' | 'webcam' | 'wikimedia') => {
             if (!selectedId || canvases.length === 0) return false;
 
-            const images = canvases.map((canvas) => createProjectDatasetImage(prepareCanvas(canvas), 'training', source));
+            const preparedCanvases = canvases.map(prepareCanvas);
             let inserted = false;
             setDatasets((current) =>
                 current.map((dataset) => {
                     if (dataset.id !== selectedId) return dataset;
                     inserted = true;
-                    return {
-                        ...dataset,
-                        images: [...images, ...dataset.images],
-                    };
+                    return addImagesToProjectDataset(dataset, preparedCanvases, 'training', source);
                 })
             );
             if (inserted) onChanged?.();
@@ -142,15 +140,11 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                 current.map((dataset) => {
                     if (dataset.id !== targetId) return dataset;
                     inserted = true;
-                    return {
-                        ...dataset,
-                        images: [createProjectDatasetImage(prepareCanvas(canvas), 'training', 'wikimedia'), ...dataset.images],
-                    };
+                    return addImagesToProjectDataset(dataset, [prepareCanvas(canvas)], 'training', 'wikimedia');
                 })
             );
             if (!inserted) throw new Error('dataset-missing');
             onChanged?.();
-            setShowImageSearch(false);
         },
         [onChanged, selectedId, setDatasets]
     );
@@ -304,7 +298,7 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                         </Typography>
                                     )}
                                     <div className={styles.imageGrid}>
-                                        {selectedDataset.images.map((image) => (
+                                        {selectedDataset.images.map((image, index) => (
                                             <article
                                                 key={image.id}
                                                 className={styles.imageCard}
@@ -318,6 +312,9 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                                                     }}
                                                     aria-label={t('dataExplorer.labels.image')}
                                                 />
+                                                <Typography className={styles.imageId}>
+                                                    {getProjectDatasetImageDisplayId(selectedDataset, image, index)}
+                                                </Typography>
                                                 <ToggleButtonGroup
                                                     exclusive
                                                     size="small"
@@ -365,6 +362,9 @@ export default function DataExplorerDialog({ open, onClose, onChanged }: Props) 
                 open={open && showImageSearch}
                 onClose={() => setShowImageSearch(false)}
                 onUseImage={handleUseImageSearchResult}
+                actionLabel={t('dataExplorer.actions.addImage')}
+                usedLabel={t('dataExplorer.actions.imageAdded')}
+                preventDuplicateUse
             />
         </>
     );

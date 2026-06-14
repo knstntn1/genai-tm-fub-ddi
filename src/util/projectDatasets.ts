@@ -8,6 +8,7 @@ const IMAGE_ROOT = `${DATASET_ROOT}/images`;
 
 interface SerializedDatasetImage {
     id: string;
+    displayId?: string;
     split: DatasetSplit;
     path: string;
     source?: ProjectDatasetImageSource;
@@ -16,6 +17,7 @@ interface SerializedDatasetImage {
 interface SerializedDataset {
     id: string;
     name: string;
+    nextImageNumber?: number;
     images: SerializedDatasetImage[];
 }
 
@@ -30,6 +32,7 @@ export function createProjectDataset(name: string): ProjectDataset {
     return {
         id: `ds_${randomId(10)}`,
         name: name.trim() || 'Dataset',
+        nextImageNumber: 1,
         images: [],
     };
 }
@@ -37,14 +40,53 @@ export function createProjectDataset(name: string): ProjectDataset {
 export function createProjectDatasetImage(
     data: HTMLCanvasElement,
     split: DatasetSplit = 'training',
-    source?: ProjectDatasetImageSource
+    source?: ProjectDatasetImageSource,
+    displayId?: string
 ): ProjectDatasetImage {
     return {
         id: `img_${randomId(12)}`,
+        displayId,
         split,
         data,
         source,
     };
+}
+
+function inferNextImageNumber(dataset: ProjectDataset): number {
+    const highestAssignedNumber = dataset.images.reduce((highest, image) => {
+        const match = image.displayId?.match(/_(\d+)$/);
+        return match ? Math.max(highest, Number(match[1])) : highest;
+    }, 0);
+
+    return Math.max(highestAssignedNumber + 1, dataset.images.length + 1);
+}
+
+export function addImagesToProjectDataset(
+    dataset: ProjectDataset,
+    canvases: HTMLCanvasElement[],
+    split: DatasetSplit = 'training',
+    source?: ProjectDatasetImageSource
+): ProjectDataset {
+    if (canvases.length === 0) return dataset;
+
+    const nextImageNumber = dataset.nextImageNumber ?? inferNextImageNumber(dataset);
+    const images = canvases.map((canvas, index) =>
+        createProjectDatasetImage(canvas, split, source, `${dataset.name}_${nextImageNumber + index}`)
+    );
+
+    return {
+        ...dataset,
+        nextImageNumber: nextImageNumber + images.length,
+        images: [...images, ...dataset.images],
+    };
+}
+
+export function getProjectDatasetImageDisplayId(
+    dataset: ProjectDataset,
+    image: ProjectDatasetImage,
+    fallbackIndex: number
+): string {
+    return image.displayId ?? `${dataset.name}_${fallbackIndex + 1}`;
 }
 
 export function isDatasetSplit(value: unknown): value is DatasetSplit {
@@ -143,6 +185,10 @@ function normalizeManifest(raw: unknown): ProjectDatasetsManifest {
             .map((dataset) => ({
                 id: dataset.id,
                 name: dataset.name,
+                nextImageNumber:
+                    typeof dataset.nextImageNumber === 'number' && dataset.nextImageNumber > 0
+                        ? dataset.nextImageNumber
+                        : undefined,
                 images: dataset.images.filter((image) => {
                     return typeof image?.id === 'string' && isDatasetSplit(image.split) && typeof image.path === 'string';
                 }),
@@ -164,6 +210,7 @@ export async function addProjectDatasetsToZip(zip: JSZip, datasets: ProjectDatas
             zip.file(imagePath, await canvasToBlob(image.data));
             serializedImages.push({
                 id: image.id,
+                displayId: image.displayId,
                 split: image.split,
                 path: imagePath,
                 source: image.source,
@@ -173,6 +220,7 @@ export async function addProjectDatasetsToZip(zip: JSZip, datasets: ProjectDatas
         manifest.datasets.push({
             id: dataset.id,
             name: dataset.name,
+            nextImageNumber: dataset.nextImageNumber ?? inferNextImageNumber(dataset),
             images: serializedImages,
         });
     }
@@ -202,6 +250,7 @@ export async function loadProjectDatasetsFromZip(file: Blob): Promise<ProjectDat
             try {
                 images.push({
                     id: image.id,
+                    displayId: image.displayId,
                     split: image.split,
                     source: image.source,
                     data: await blobToCanvas(await imageFile.async('blob')),
@@ -214,6 +263,7 @@ export async function loadProjectDatasetsFromZip(file: Blob): Promise<ProjectDat
         datasets.push({
             id: dataset.id,
             name: dataset.name,
+            nextImageNumber: dataset.nextImageNumber ?? inferNextImageNumber({ ...dataset, images }),
             images,
         });
     }

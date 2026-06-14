@@ -31,7 +31,7 @@ describe('DatasetPicker', () => {
             {
                 id: 'ds-1',
                 name: 'Dataset',
-                images: [{ id: 'img-1', split: 'training', data: canvas }],
+                images: [{ id: 'img-1', displayId: 'Dataset_7', split: 'training', data: canvas }],
             },
         ]);
 
@@ -46,6 +46,7 @@ describe('DatasetPicker', () => {
         );
 
         await screen.findByText('DataExplorer');
+        expect(screen.getByText('Dataset_7')).toBeInTheDocument();
         await user.click(screen.getByAltText('dataExplorer.labels.image'));
         await user.click(screen.getByRole('button', { name: 'trainingdata.actions.use' }));
 

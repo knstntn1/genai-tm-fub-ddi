@@ -34,6 +34,9 @@ interface Props {
     onClose: () => void;
     onUseImage: (result: ImageSearchResult) => void | Promise<void>;
     searchClient?: SearchClient;
+    actionLabel?: string;
+    usedLabel?: string;
+    preventDuplicateUse?: boolean;
 }
 
 export default function ImageSearchDialog({
@@ -41,6 +44,9 @@ export default function ImageSearchDialog({
     onClose,
     onUseImage,
     searchClient = searchWikimediaCommonsImages,
+    actionLabel,
+    usedLabel,
+    preventDuplicateUse = false,
 }: Props) {
     const { namespace } = useVariant();
     const { t } = useTranslation(namespace);
@@ -54,6 +60,7 @@ export default function ImageSearchDialog({
     const [showEmptyQuery, setShowEmptyQuery] = useState(false);
     const [pendingUseIds, setPendingUseIds] = useState<Set<string>>(() => new Set());
     const [failedUseIds, setFailedUseIds] = useState<Set<string>>(() => new Set());
+    const [usedIds, setUsedIds] = useState<Set<string>>(() => new Set());
     const activeSearch = useRef<AbortController | null>(null);
     const requestId = useRef(0);
 
@@ -135,6 +142,7 @@ export default function ImageSearchDialog({
             setPage(0);
             setPageCount(0);
             setFailedUseIds(new Set());
+            setUsedIds(new Set());
             void runSearch(trimmedQuery, 1);
         },
         [isSearching, query, runSearch]
@@ -154,12 +162,15 @@ export default function ImageSearchDialog({
 
     const handleClose = useCallback(() => {
         abortActiveSearch();
+        setPendingUseIds(new Set());
+        setFailedUseIds(new Set());
+        setUsedIds(new Set());
         onClose();
     }, [abortActiveSearch, onClose]);
 
     const handleUseImage = useCallback(
         async (result: ImageSearchResult) => {
-            if (pendingUseIds.has(result.id)) return;
+            if (pendingUseIds.has(result.id) || (preventDuplicateUse && usedIds.has(result.id))) return;
 
             setPendingUseIds((current) => new Set(current).add(result.id));
             setFailedUseIds((current) => {
@@ -170,6 +181,9 @@ export default function ImageSearchDialog({
 
             try {
                 await onUseImage(result);
+                if (preventDuplicateUse) {
+                    setUsedIds((current) => new Set(current).add(result.id));
+                }
             } catch {
                 setFailedUseIds((current) => new Set(current).add(result.id));
             } finally {
@@ -180,7 +194,7 @@ export default function ImageSearchDialog({
                 });
             }
         },
-        [onUseImage, pendingUseIds]
+        [onUseImage, pendingUseIds, preventDuplicateUse, usedIds]
     );
 
     return (
@@ -282,23 +296,26 @@ export default function ImageSearchDialog({
                         {results.map((result) => {
                             const isPending = pendingUseIds.has(result.id);
                             const hasFailed = failedUseIds.has(result.id);
+                            const wasUsed = usedIds.has(result.id);
                             const accessibleTitle = result.title || t('trainingdata.imageSearch.fallbackAlt');
+                            const resultActionLabel = actionLabel ?? t('trainingdata.imageSearch.useImage');
+                            const currentLabel = wasUsed ? usedLabel ?? resultActionLabel : resultActionLabel;
 
                             return (
                                 <button
                                     key={result.id}
                                     type="button"
-                                    className={styles.resultButton}
+                                    className={`${styles.resultButton} ${wasUsed ? styles.usedResultButton : ''}`}
                                     onClick={() => void handleUseImage(result)}
-                                    disabled={isPending}
-                                    aria-label={`${t('trainingdata.imageSearch.useImage')}: ${accessibleTitle}`}
+                                    disabled={isPending || (preventDuplicateUse && wasUsed)}
+                                    aria-label={`${currentLabel}: ${accessibleTitle}`}
                                 >
                                     <img
                                         src={result.thumbnailUrl}
                                         alt={accessibleTitle}
                                         className={styles.resultImage}
                                     />
-                                    <span className={styles.resultOverlay}>{t('trainingdata.imageSearch.useImage')}</span>
+                                    <span className={styles.resultOverlay}>{currentLabel}</span>
                                     {isPending && (
                                         <span
                                             className={styles.pendingUse}

@@ -97,6 +97,14 @@
     justify-self: center;
 }
 
+.imageId {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: center;
+    font-size: 0.78rem;
+    line-height: 1.2;
+}
+
 .splitToggle {
     display: grid;
     grid-template-columns: 1fr 1fr;

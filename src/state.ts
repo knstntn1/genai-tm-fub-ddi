@@ -20,6 +20,7 @@ export type ProjectDatasetImageSource = 'upload' | 'webcam' | 'openverse' | 'wik
 
 export interface ProjectDatasetImage {
     id: string;
+    displayId?: string;
     split: DatasetSplit;
     data: HTMLCanvasElement;
     source?: ProjectDatasetImageSource;
@@ -28,6 +29,7 @@ export interface ProjectDatasetImage {
 export interface ProjectDataset {
     id: string;
     name: string;
+    nextImageNumber?: number;
     images: ProjectDatasetImage[];
 }
 

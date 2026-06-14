@@ -9,7 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { datasetState, ProjectDatasetImage } from '@genaitm/state';
-import { canvasToDataUrl } from '@genaitm/util/projectDatasets';
+import { canvasToDataUrl, getProjectDatasetImageDisplayId } from '@genaitm/util/projectDatasets';
 import { useVariant } from '@genaitm/util/variant';
 import ImageTile from '../DatasetPicker/ImageTile';
 import styles from '../DatasetPicker/DatasetPicker.module.css';
@@ -93,6 +93,13 @@ export default function DatasetTestPicker({
                                                 key={image.id}
                                                 url={canvasToDataUrl(image.data)}
                                                 alt={t('dataExplorer.labels.image')}
+                                                label={getProjectDatasetImageDisplayId(
+                                                    dataset,
+                                                    image,
+                                                    dataset.images.findIndex(
+                                                        (datasetImage) => datasetImage.id === image.id
+                                                    )
+                                                )}
                                                 imgClassName={styles.testImage}
                                                 selected={false}
                                                 onClick={() => handleImageClick(image)}

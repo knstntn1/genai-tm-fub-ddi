@@ -260,6 +260,44 @@ describe('ImageSearchDialog', () => {
         expect(await screen.findByRole('status')).toHaveTextContent('Bild wird hinzugefügt...');
     });
 
+    it('supports adding several distinct images without closing the dialog', async ({ expect }) => {
+        const user = userEvent.setup();
+        const searchClient = vi.fn().mockResolvedValue(searchResponse([catResult, dogResult]));
+        const onUseImage = vi.fn().mockResolvedValue(undefined);
+        const onClose = vi.fn();
+
+        render(
+            <ImageSearchDialog
+                open={true}
+                onClose={onClose}
+                onUseImage={onUseImage}
+                searchClient={searchClient}
+                actionLabel="Hinzufügen"
+                usedLabel="Hinzugefügt"
+                preventDuplicateUse
+            />
+        );
+
+        await user.type(screen.getByLabelText('Suchbegriff'), 'tier');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+
+        const catButton = await screen.findByRole('button', { name: 'Hinzufügen: Visible Cat Metadata' });
+        const dogButton = screen.getByRole('button', { name: 'Hinzufügen: Dog Metadata' });
+        expect(within(catButton).getByText('Hinzufügen')).toBeInTheDocument();
+
+        await user.click(catButton);
+        await waitFor(() => expect(catButton).toBeDisabled());
+        expect(catButton).toHaveAccessibleName('Hinzugefügt: Visible Cat Metadata');
+        expect(within(catButton).getByText('Hinzugefügt')).toBeVisible();
+
+        await user.click(dogButton);
+        await waitFor(() => expect(dogButton).toBeDisabled());
+
+        expect(onUseImage).toHaveBeenCalledTimes(2);
+        expect(onClose).not.toHaveBeenCalled();
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
     it('loads the next page and appends results', async ({ expect }) => {
         const user = userEvent.setup();
         const searchClient = vi

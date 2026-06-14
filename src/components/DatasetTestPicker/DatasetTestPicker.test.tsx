@@ -25,7 +25,7 @@ describe('DatasetTestPicker', () => {
             {
                 id: 'ds-1',
                 name: 'Dataset',
-                images: [{ id: 'img-1', split: 'test', data: canvas }],
+                images: [{ id: 'img-1', displayId: 'Dataset_4', split: 'test', data: canvas }],
             },
         ]);
 
@@ -40,6 +40,7 @@ describe('DatasetTestPicker', () => {
             </Provider>
         );
 
+        expect(screen.getByText('Dataset_4')).toBeInTheDocument();
         await user.click(screen.getByTestId('dataset-image'));
 
         expect(onImageSelected).toHaveBeenCalledWith(canvas);

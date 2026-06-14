@@ -8,6 +8,24 @@
     overflow: hidden;
 }
 
+.imageTile {
+    width: 96px;
+    flex: 0 0 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.imageLabel {
+    width: 100%;
+    overflow-wrap: anywhere;
+    color: textDark;
+    font-size: 0.7rem;
+    line-height: 1.15;
+    text-align: center;
+}
+
 /* Put the visible border on the container so scaled images don't move it */
 .imageContainer {
     border: 1px solid borderGrey;
@@ -187,7 +205,8 @@
     overflow-x: auto;
     overflow-y: hidden;
     margin: 0px 8px;
-    height: 96px;
+    min-height: 112px;
+    max-height: 132px;
     scrollbar-gutter: stable;
     align-items: flex-start;
 }

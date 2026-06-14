@@ -1,8 +1,9 @@
 import { describe, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStore, Provider } from 'jotai';
 import { datasetState } from '@genaitm/state';
+import { importRemoteImage } from '@genaitm/util/remoteImageImport';
 import DataExplorerDialog from './DataExplorerDialog';
 
 const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext') as unknown as {
@@ -17,7 +18,48 @@ vi.mock('@genaitm/workflow/ClassEntry/WebcamCapture', () => ({
 }));
 
 vi.mock('@genaitm/workflow/ImageSearch/ImageSearchDialog', () => ({
-    default: () => null,
+    default: ({
+        open,
+        onUseImage,
+        actionLabel,
+    }: {
+        open: boolean;
+        onUseImage: (result: { id: string; imageUrl: string; thumbnailUrl: string }) => Promise<void>;
+        actionLabel: string;
+    }) =>
+        open ? (
+            <div data-testid="image-search-dialog">
+                <span>{actionLabel}</span>
+                <button
+                    data-testid="add-result-1"
+                    onClick={() =>
+                        void onUseImage({
+                            id: 'result-1',
+                            imageUrl: 'https://example.com/one.jpg',
+                            thumbnailUrl: 'https://example.com/one-thumb.jpg',
+                        })
+                    }
+                >
+                    add-result-1
+                </button>
+                <button
+                    data-testid="add-result-2"
+                    onClick={() =>
+                        void onUseImage({
+                            id: 'result-2',
+                            imageUrl: 'https://example.com/two.jpg',
+                            thumbnailUrl: 'https://example.com/two-thumb.jpg',
+                        })
+                    }
+                >
+                    add-result-2
+                </button>
+            </div>
+        ) : null,
+}));
+
+vi.mock('@genaitm/util/remoteImageImport', () => ({
+    importRemoteImage: vi.fn(),
 }));
 
 describe('DataExplorerDialog', () => {
@@ -90,5 +132,43 @@ describe('DataExplorerDialog', () => {
         await user.click(screen.getByLabelText('dataExplorer.actions.createDataset'));
         expect(screen.getByText('Neu (0)')).toBeInTheDocument();
         expect(onChanged).toHaveBeenCalledTimes(2);
+    });
+
+    it('adds several search results without closing and assigns consecutive display IDs', async ({ expect }) => {
+        const user = userEvent.setup();
+        const firstCanvas = document.createElement('canvas');
+        const secondCanvas = document.createElement('canvas');
+        vi.mocked(importRemoteImage).mockResolvedValueOnce(firstCanvas).mockResolvedValueOnce(secondCanvas);
+
+        const store = createStore();
+        store.set(datasetState, [
+            {
+                id: 'ds-1',
+                name: 'Tiere',
+                nextImageNumber: 1,
+                images: [],
+            },
+        ]);
+
+        render(
+            <Provider store={store}>
+                <DataExplorerDialog
+                    open={true}
+                    onClose={() => {}}
+                />
+            </Provider>
+        );
+
+        await user.click(screen.getByRole('button', { name: 'trainingdata.actions.imageSearch' }));
+        expect(screen.getByText('dataExplorer.actions.addImage')).toBeInTheDocument();
+
+        await user.click(screen.getByTestId('add-result-1'));
+        await waitFor(() => expect(screen.getByText('Tiere_1')).toBeInTheDocument());
+
+        await user.click(screen.getByTestId('add-result-2'));
+        await waitFor(() => expect(screen.getByText('Tiere_2')).toBeInTheDocument());
+
+        expect(screen.getByTestId('image-search-dialog')).toBeInTheDocument();
+        expect(store.get(datasetState)[0].nextImageNumber).toBe(3);
     });
 });

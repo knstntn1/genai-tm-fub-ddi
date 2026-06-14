@@ -113,6 +113,20 @@
     cursor: wait;
 }
 
+.usedResultButton:disabled {
+    cursor: default;
+}
+
+.usedResultButton .resultImage {
+    filter: grayscale(1);
+    opacity: 0.55;
+}
+
+.usedResultButton .resultOverlay {
+    opacity: 1;
+    background-color: rgba(55, 65, 70, 0.72);
+}
+
 .resultImage {
     width: 100%;
     height: 100%;

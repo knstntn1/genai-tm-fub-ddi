@@ -1,6 +1,7 @@
 import { describe, it, vi } from 'vitest';
 import JSZip from 'jszip';
 import {
+    addImagesToProjectDataset,
     addProjectDatasetsToZip,
     createProjectDatasetImage,
     getProjectDatasetImagesBySplit,
@@ -28,6 +29,20 @@ describe('projectDatasets', () => {
         expect(image.data.width).toBe(224);
     });
 
+    it('assigns stable, consecutive display IDs when images are added', ({ expect }) => {
+        const dataset: ProjectDataset = {
+            id: 'ds-1',
+            name: 'Meine Tiere',
+            nextImageNumber: 3,
+            images: [],
+        };
+
+        const updated = addImagesToProjectDataset(dataset, [createCanvas(), createCanvas()], 'training', 'upload');
+
+        expect(updated.images.map((image) => image.displayId)).toEqual(['Meine Tiere_3', 'Meine Tiere_4']);
+        expect(updated.nextImageNumber).toBe(5);
+    });
+
     it('updates and filters image split tags', ({ expect }) => {
         const training = { id: 'img-1', split: 'training' as const, data: createCanvas() };
         const test = { id: 'img-2', split: 'test' as const, data: createCanvas() };
@@ -47,14 +62,25 @@ describe('projectDatasets', () => {
             {
                 id: 'ds-1',
                 name: 'Meine Daten',
-                images: [{ id: 'img-1', split: 'training', data: createCanvas(), source: 'upload' }],
+                nextImageNumber: 2,
+                images: [
+                    {
+                        id: 'img-1',
+                        displayId: 'Meine Daten_1',
+                        split: 'training',
+                        data: createCanvas(),
+                        source: 'upload',
+                    },
+                ],
             },
         ]);
 
         const manifest = JSON.parse((await zip.file(PROJECT_DATASETS_MANIFEST_PATH)?.async('string')) ?? '{}');
         expect(manifest.datasets[0].name).toBe('Meine Daten');
+        expect(manifest.datasets[0].nextImageNumber).toBe(2);
         expect(manifest.datasets[0].images[0]).toMatchObject({
             id: 'img-1',
+            displayId: 'Meine Daten_1',
             split: 'training',
             path: 'project-datasets/images/ds-1_img-1.png',
             source: 'upload',

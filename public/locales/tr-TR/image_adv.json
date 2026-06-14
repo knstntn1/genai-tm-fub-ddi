@@ -473,7 +473,9 @@
         "actions": {
             "createDataset": "Create dataset",
             "deleteDataset": "Delete dataset",
-            "deleteImage": "Delete image"
+            "deleteImage": "Delete image",
+            "addImage": "Add",
+            "imageAdded": "Added"
         },
         "split": {
             "training": "Training",

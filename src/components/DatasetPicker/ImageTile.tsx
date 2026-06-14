@@ -7,6 +7,7 @@ import { useScrollRoot } from './ScrollRootContext';
 interface ImageTileProps {
     url: string;
     alt?: string;
+    label?: string;
     imgClassName?: string;
     selected?: boolean;
     showCheckbox?: boolean;
@@ -21,6 +22,7 @@ interface ImageTileProps {
 export default function ImageTile({
     url,
     alt,
+    label,
     imgClassName,
     selected,
     showCheckbox,
@@ -66,29 +68,32 @@ export default function ImageTile({
     }, [url, scrollRoot]);
 
     return (
-        <Box
-            className={`${styles.imageContainer} ${containerSelected && selected ? styles.selected : ''}`}
-            onClick={() => {
-                if (!hasFailed && onClick) onClick();
-            }}
-            sx={hasFailed ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-        >
-            {showCheckbox && !hasFailed && (
-                <Checkbox
-                    checked={!!checked}
-                    className={styles.imageCheckbox}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={onCheckboxChange}
+        <div className={styles.imageTile}>
+            <Box
+                className={`${styles.imageContainer} ${containerSelected && selected ? styles.selected : ''}`}
+                onClick={() => {
+                    if (!hasFailed && onClick) onClick();
+                }}
+                sx={hasFailed ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
+                {showCheckbox && !hasFailed && (
+                    <Checkbox
+                        checked={!!checked}
+                        className={styles.imageCheckbox}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={onCheckboxChange}
+                    />
+                )}
+                <img
+                    ref={imgRef}
+                    src={lazySrc}
+                    alt={alt}
+                    className={imgClassName ?? ''}
+                    onError={onError}
+                    data-testid="dataset-image"
                 />
-            )}
-            <img
-                ref={imgRef}
-                src={lazySrc}
-                alt={alt}
-                className={imgClassName ?? ''}
-                onError={onError}
-                data-testid="dataset-image"
-            />
-        </Box>
+            </Box>
+            {label && <span className={styles.imageLabel}>{label}</span>}
+        </div>
     );
 }
