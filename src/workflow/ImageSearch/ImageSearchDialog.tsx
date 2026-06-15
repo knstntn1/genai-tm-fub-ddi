@@ -49,7 +49,7 @@ export default function ImageSearchDialog({
     preventDuplicateUse = false,
 }: Props) {
     const { namespace } = useVariant();
-    const { t } = useTranslation(namespace);
+    const { t, i18n } = useTranslation(namespace);
     const [query, setQuery] = useState('');
     const [submittedQuery, setSubmittedQuery] = useState('');
     const [results, setResults] = useState<ImageSearchResult[]>([]);
@@ -88,6 +88,7 @@ export default function ImageSearchDialog({
             try {
                 const response = await searchClient({
                     query: nextQuery,
+                    language: i18n.resolvedLanguage ?? i18n.language,
                     page: nextPage,
                     signal: controller.signal,
                 });
@@ -115,7 +116,7 @@ export default function ImageSearchDialog({
                 setStatus(error instanceof ImageSearchError && error.code === 'rate-limited' ? 'rate-limited' : 'error');
             }
         },
-        [abortActiveSearch, results.length, searchClient]
+        [abortActiveSearch, i18n.language, i18n.resolvedLanguage, results.length, searchClient]
     );
 
     useEffect(() => {

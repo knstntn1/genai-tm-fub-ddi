@@ -3,6 +3,7 @@ import { ImageSearchError } from './imageSearch';
 import {
     DEFAULT_WIKIMEDIA_COMMONS_PAGE_SIZE,
     searchWikimediaCommonsImages,
+    toWikimediaLanguageCode,
     WIKIMEDIA_COMMONS_API_URL,
 } from './wikimediaCommons';
 
@@ -29,22 +30,37 @@ describe('Wikimedia Commons image search client', () => {
     it('builds a browser-safe Commons file search request', async ({ expect }) => {
         global.fetch = vi.fn(() => Promise.resolve(successfulResponse())) as unknown as typeof fetch;
 
-        await searchWikimediaCommonsImages({ query: ' Katze ' });
+        await searchWikimediaCommonsImages({ query: ' Katze ', language: 'de-DE' });
 
         const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
         const requestUrl = new URL(String(fetchMock.mock.calls[0][0]));
         expect(requestUrl.origin + requestUrl.pathname).toBe(WIKIMEDIA_COMMONS_API_URL);
         expect(requestUrl.searchParams.get('action')).toBe('query');
+        expect(requestUrl.searchParams.get('uselang')).toBe('de');
         expect(requestUrl.searchParams.get('generator')).toBe('search');
-        expect(requestUrl.searchParams.get('gsrsearch')).toBe('Katze filetype:bitmap');
+        expect(requestUrl.searchParams.get('gsrsearch')).toBe('filetype:bitmap|drawing -fileres:0 Katze');
         expect(requestUrl.searchParams.get('gsrnamespace')).toBe('6');
         expect(requestUrl.searchParams.get('gsrlimit')).toBe('20');
         expect(requestUrl.searchParams.get('gsroffset')).toBe('0');
-        expect(requestUrl.searchParams.get('prop')).toBe('imageinfo');
+        expect(requestUrl.searchParams.get('gsrinfo')).toBe('totalhits|suggestion');
+        expect(requestUrl.searchParams.get('gsrprop')).toBe('size|wordcount|timestamp|snippet');
+        expect(requestUrl.searchParams.get('prop')).toBe('info|imageinfo|entityterms');
+        expect(requestUrl.searchParams.get('inprop')).toBe('url');
         expect(requestUrl.searchParams.get('iiprop')).toBe('url|mime|size|extmetadata');
         expect(requestUrl.searchParams.get('iiurlwidth')).toBe('480');
+        expect(requestUrl.searchParams.get('iiextmetadatalanguage')).toBe('de');
+        expect(requestUrl.searchParams.get('wbetterms')).toBe('label');
         expect(requestUrl.searchParams.get('origin')).toBe('*');
         expect(fetchMock.mock.calls[0][1]).toEqual({ signal: undefined });
+    });
+
+    it('maps app locales to Wikimedia language codes', ({ expect }) => {
+        expect(toWikimediaLanguageCode('de-DE')).toBe('de');
+        expect(toWikimediaLanguageCode('pt-BR')).toBe('pt-br');
+        expect(toWikimediaLanguageCode('kr-KR')).toBe('ko');
+        expect(toWikimediaLanguageCode('ua-UA')).toBe('uk');
+        expect(toWikimediaLanguageCode('sv')).toBe('sv');
+        expect(toWikimediaLanguageCode()).toBe('en');
     });
 
     it('uses an offset for subsequent pages and normalizes pagination', async ({ expect }) => {

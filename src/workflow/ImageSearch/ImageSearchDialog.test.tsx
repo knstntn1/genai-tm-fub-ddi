@@ -8,6 +8,10 @@ import { ImageSearchError, type ImageSearchResult, type ImageSearchResponse } fr
 
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
+        i18n: {
+            language: 'de-DE',
+            resolvedLanguage: 'de-DE',
+        },
         t: (key: string) => {
             const copy: Record<string, string> = {
                 'trainingdata.imageSearch.title': 'Bildersuche',
@@ -102,6 +106,7 @@ describe('ImageSearchDialog', () => {
         await waitFor(() => expect(searchClient).toHaveBeenCalledTimes(1));
         expect(searchClient).toHaveBeenCalledWith({
             query: 'katze',
+            language: 'de-DE',
             page: 1,
             signal: expect.any(AbortSignal),
         });
@@ -112,6 +117,7 @@ describe('ImageSearchDialog', () => {
         await waitFor(() => expect(searchClient).toHaveBeenCalledTimes(2));
         expect(searchClient).toHaveBeenLastCalledWith({
             query: 'hund',
+            language: 'de-DE',
             page: 1,
             signal: expect.any(AbortSignal),
         });
@@ -316,6 +322,7 @@ describe('ImageSearchDialog', () => {
         expect(screen.getByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
         expect(searchClient).toHaveBeenLastCalledWith({
             query: 'tier',
+            language: 'de-DE',
             page: 2,
             signal: expect.any(AbortSignal),
         });
@@ -344,6 +351,7 @@ describe('ImageSearchDialog', () => {
         expect(await screen.findByRole('img', { name: 'Dog Metadata' })).toBeInTheDocument();
         expect(searchClient).toHaveBeenLastCalledWith({
             query: 'hund',
+            language: 'de-DE',
             page: 1,
             signal: expect.any(AbortSignal),
         });
@@ -371,6 +379,7 @@ describe('ImageSearchDialog', () => {
         expect(screen.getByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
         expect(searchClient).toHaveBeenLastCalledWith({
             query: 'tier',
+            language: 'de-DE',
             page: 2,
             signal: expect.any(AbortSignal),
         });

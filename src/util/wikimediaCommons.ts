@@ -8,6 +8,22 @@ import {
 export const WIKIMEDIA_COMMONS_API_URL = 'https://commons.wikimedia.org/w/api.php';
 export const DEFAULT_WIKIMEDIA_COMMONS_PAGE_SIZE = 20;
 const WIKIMEDIA_THUMBNAIL_WIDTH = 480;
+const WIKIMEDIA_LANGUAGE_CODES: Record<string, string> = {
+    'de-de': 'de',
+    'en-gb': 'en',
+    'fi-fi': 'fi',
+    'fr-fr': 'fr',
+    'it-it': 'it',
+    'ja-jp': 'ja',
+    'ko-kr': 'ko',
+    'kr-kr': 'ko',
+    'krl-fi': 'krl',
+    'pt-br': 'pt-br',
+    'ru-ru': 'ru',
+    'si-lk': 'si',
+    'tr-tr': 'tr',
+    'ua-ua': 'uk',
+};
 
 type JsonRecord = Record<string, unknown>;
 
@@ -44,16 +60,23 @@ export async function searchWikimediaCommonsImages(options: ImageSearchOptions):
 
     const page = Math.max(1, integerOrFallback(options.page, 1));
     const pageSize = Math.min(50, Math.max(1, integerOrFallback(options.pageSize, DEFAULT_WIKIMEDIA_COMMONS_PAGE_SIZE)));
+    const language = toWikimediaLanguageCode(options.language);
     const url = new URL(WIKIMEDIA_COMMONS_API_URL);
     url.searchParams.set('action', 'query');
+    url.searchParams.set('uselang', language);
     url.searchParams.set('generator', 'search');
-    url.searchParams.set('gsrsearch', `${query} filetype:bitmap`);
+    url.searchParams.set('gsrsearch', `filetype:bitmap|drawing -fileres:0 ${query}`);
     url.searchParams.set('gsrnamespace', '6');
     url.searchParams.set('gsrlimit', String(pageSize));
     url.searchParams.set('gsroffset', String((page - 1) * pageSize));
-    url.searchParams.set('prop', 'imageinfo');
+    url.searchParams.set('gsrinfo', 'totalhits|suggestion');
+    url.searchParams.set('gsrprop', 'size|wordcount|timestamp|snippet');
+    url.searchParams.set('prop', 'info|imageinfo|entityterms');
+    url.searchParams.set('inprop', 'url');
     url.searchParams.set('iiprop', 'url|mime|size|extmetadata');
     url.searchParams.set('iiurlwidth', String(WIKIMEDIA_THUMBNAIL_WIDTH));
+    url.searchParams.set('iiextmetadatalanguage', language);
+    url.searchParams.set('wbetterms', 'label');
     url.searchParams.set('format', 'json');
     url.searchParams.set('formatversion', '2');
     url.searchParams.set('origin', '*');
@@ -88,6 +111,15 @@ export async function searchWikimediaCommonsImages(options: ImageSearchOptions):
     }
 
     return normalizeResponse(json, page, pageSize);
+}
+
+export function toWikimediaLanguageCode(language?: string): string {
+    const normalized = language?.trim().toLowerCase().replace(/_/g, '-');
+    if (!normalized) {
+        return 'en';
+    }
+
+    return WIKIMEDIA_LANGUAGE_CODES[normalized] ?? normalized.split('-')[0];
 }
 
 function normalizeResponse(response: unknown, page: number, pageSize: number): ImageSearchResponse {

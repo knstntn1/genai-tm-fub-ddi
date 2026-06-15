@@ -22,6 +22,7 @@ export interface ImageSearchResponse {
 
 export interface ImageSearchOptions {
     query: string;
+    language?: string;
     page?: number;
     pageSize?: number;
     signal?: AbortSignal;
