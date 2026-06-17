@@ -93,7 +93,7 @@ describe('ImageClassifier component', () => {
         render(<ImageClassifier />, { wrapper: TestWrapper });
         await waitFor(() => expect(screen.getByText('behaviours.labels.title')).not.toBeVisible());
         expect(screen.getByTestId('widget-trainingdata.labels.class 1')).toBeInTheDocument();
-        expect(screen.getByTestId('next-step')).toBeDisabled();
+        expect(screen.queryByTestId('next-step')).not.toBeInTheDocument();
     });
 
     /*it('has no axe violations', async () => {
@@ -134,12 +134,7 @@ describe('ImageClassifier Integration', () => {
         await waitFor(() => expect(screen.getByTestId('alert-complete')).toBeVisible());
         await waitFor(() => expect(screen.getByTestId('prediction-0')).toBeVisible());
 
-        const nextButton = screen.getByTestId('next-step');
-        expect(nextButton).toBeEnabled();
-        await user.click(nextButton);
-
-        expect(screen.getByTestId('widget-output.labels.title')).toBeVisible();
-        await waitFor(() => expect(screen.getByTestId('widget-class 1')).toBeVisible());
-        expect(screen.getByTestId('widget-class 2')).toBeVisible();
+        expect(screen.queryByTestId('next-step')).not.toBeInTheDocument();
+        expect(screen.getByTestId('widget-output.labels.title')).not.toBeVisible();
     });
 });

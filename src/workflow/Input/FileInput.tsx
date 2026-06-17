@@ -22,6 +22,8 @@ interface Props {
     onExample: (example: HTMLCanvasElement | AudioExample) => void;
 }
 
+const TEST_IMAGE_DISPLAY_SCALE = 0.75;
+
 export default function FileInput({ isAudio, example, onExample, enableInput }: Props) {
     const { namespace, sampleDatasets } = useVariant();
     const { t } = useTranslation(namespace);
@@ -139,14 +141,15 @@ export default function FileInput({ isAudio, example, onExample, enableInput }: 
 
     useEffect(() => {
         if (fileImageRef.current && example && example instanceof HTMLCanvasElement) {
-            example.style.width = '224px';
-            example.style.height = '224px';
+            const displaySize = Math.round(imageSize * TEST_IMAGE_DISPLAY_SCALE);
+            example.style.width = `${displaySize}px`;
+            example.style.height = `${displaySize}px`;
             while (fileImageRef.current.firstChild) {
                 fileImageRef.current.removeChild(fileImageRef.current.firstChild);
             }
             fileImageRef.current.appendChild(example);
         }
-    }, [example]);
+    }, [example, imageSize]);
 
     return (
         <div
@@ -206,8 +209,8 @@ export default function FileInput({ isAudio, example, onExample, enableInput }: 
                 <Skeleton
                     sx={{ marginTop: '1rem' }}
                     variant="rounded"
-                    width={isAudio ? 200 : 224}
-                    height={isAudio ? 58 : 224}
+                    width={isAudio ? 200 : Math.round(imageSize * TEST_IMAGE_DISPLAY_SCALE)}
+                    height={isAudio ? 58 : Math.round(imageSize * TEST_IMAGE_DISPLAY_SCALE)}
                 />
             )}
             <AlertModal
