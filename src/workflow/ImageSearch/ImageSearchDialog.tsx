@@ -73,6 +73,20 @@ export default function ImageSearchDialog({
         activeSearch.current = null;
     }, []);
 
+    const resetSearchState = useCallback(() => {
+        setQuery('');
+        setSubmittedQuery('');
+        setResults([]);
+        setPage(0);
+        setPageCount(0);
+        setStatus('idle');
+        setRetryRequest(null);
+        setShowEmptyQuery(false);
+        setPendingUseIds(new Set());
+        setFailedUseIds(new Set());
+        setUsedIds(new Set());
+    }, []);
+
     const runSearch = useCallback(
         async (nextQuery: string, nextPage: number) => {
             abortActiveSearch();
@@ -120,14 +134,16 @@ export default function ImageSearchDialog({
     );
 
     useEffect(() => {
-        if (!open) {
+        if (open) {
+            resetSearchState();
+        } else {
             abortActiveSearch();
         }
 
         return () => {
             abortActiveSearch();
         };
-    }, [abortActiveSearch, open]);
+    }, [abortActiveSearch, open, resetSearchState]);
 
     const handleSubmit = useCallback(
         (event?: FormEvent<HTMLFormElement>) => {

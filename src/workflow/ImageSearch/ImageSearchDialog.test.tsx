@@ -227,6 +227,46 @@ describe('ImageSearchDialog', () => {
         expect(screen.queryByRole('checkbox', { name: /mature|erwachsen|filter/i })).not.toBeInTheDocument();
     });
 
+    it('starts with an empty search every time it is opened', async ({ expect }) => {
+        const user = userEvent.setup();
+        const searchClient = vi.fn().mockResolvedValue(searchResponse([catResult]));
+        const onClose = vi.fn();
+        const { rerender } = render(
+            <ImageSearchDialog
+                open={true}
+                onClose={onClose}
+                onUseImage={() => {}}
+                searchClient={searchClient}
+            />
+        );
+
+        await user.type(screen.getByLabelText('Suchbegriff'), 'katze');
+        await user.click(screen.getByRole('button', { name: 'Bilder suchen' }));
+        expect(await screen.findByRole('img', { name: 'Visible Cat Metadata' })).toBeInTheDocument();
+
+        rerender(
+            <ImageSearchDialog
+                open={false}
+                onClose={onClose}
+                onUseImage={() => {}}
+                searchClient={searchClient}
+            />
+        );
+        rerender(
+            <ImageSearchDialog
+                open={true}
+                onClose={onClose}
+                onUseImage={() => {}}
+                searchClient={searchClient}
+            />
+        );
+
+        expect(screen.getByLabelText('Suchbegriff')).toHaveValue('');
+        expect(screen.getByRole('button', { name: 'Bilder suchen' })).toBeDisabled();
+        expect(screen.getByText('Suche nach Bildern für diese Klasse.')).toBeInTheDocument();
+        expect(screen.queryByRole('img', { name: 'Visible Cat Metadata' })).not.toBeInTheDocument();
+    });
+
     it('uses the selected result through hover, focus, click, Enter, and Space activation', async ({ expect }) => {
         const user = userEvent.setup();
         const searchClient = vi.fn().mockResolvedValue(searchResponse([catResult]));
