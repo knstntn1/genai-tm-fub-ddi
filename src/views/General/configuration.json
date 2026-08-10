@@ -21,7 +21,7 @@
         "showTrainingAnimation": false,
         "resetOnLoad": false,
         "enableFileInput": true,
-        "allowDeploy": true,
+        "allowDeploy": false,
         "showDragTip": false,
         "usep2p": true,
         "showSettings": true,
